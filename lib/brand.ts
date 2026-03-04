@@ -1,74 +1,75 @@
-// Dulcitienda brand colors based on Facebook page
+// Dulcitienda brand colors - EXACT from official logo
 export const brandColors = {
-  // Primary - Rosa/Magenta
+  // Primary - Rosa/Magenta (del dulce principal)
   primary: {
-    DEFAULT: '#E91E63',
-    light: '#F06292',
-    dark: '#C2185B',
-    50: '#FCE4EC',
-    100: '#F8BBD9',
-    200: '#F48FB1',
-    300: '#F06292',
-    400: '#EC407A',
-    500: '#E91E63',
-    600: '#D81B60',
-    700: '#C2185B',
-    800: '#AD1457',
-    900: '#880E4F',
+    DEFAULT: '#EC4899', // Rosa principal
+    light: '#F472B6',
+    dark: '#DB2777',
+    50: '#FDF2F8',
+    100: '#FCE7F3',
+    200: '#FBCFE8',
+    300: '#F9A8D4',
+    400: '#F472B6',
+    500: '#EC4899',
+    600: '#DB2777',
+    700: '#BE185D',
+    800: '#9D174D',
+    900: '#831843',
   },
-  // Secondary - Amarillo/Dorado
+  // Secondary - Azul del fondo y del dulce
   secondary: {
-    DEFAULT: '#FFD700',
-    light: '#FFEB3B',
-    dark: '#FBC02D',
+    DEFAULT: '#1E40AF', // Azul oscuro fondo
+    light: '#3B82F6',
+    dark: '#1E3A8A',
+    candy: '#60A5FA', // Azul claro del dulce
   },
-  // Accent - Azul oscuro (del fondo del logo)
+  // Accent - Amarillo (centro del dulce)
   accent: {
-    DEFAULT: '#1A237E',
-    light: '#3949AB',
-    dark: '#0D1642',
+    DEFAULT: '#FCD34D', // Amarillo principal
+    light: '#FDE68A',
+    dark: '#F59E0B',
   },
   // Background
   background: {
-    DEFAULT: '#FFF8E7', // Crema suave
-    dark: '#1A237E', // Azul del logo
+    DEFAULT: '#EFF6FF', // Azul muy claro
+    dark: '#1E3A8A', // Azul del logo
   }
 };
 
-// Tailwind classes for Dulcitienda theme
+// Tailwind classes for Dulcitienda theme - EXACT colors
 export const theme = {
-  // Header/Top bar
-  topBar: 'bg-gradient-to-r from-pink-600 via-pink-500 to-yellow-400',
-  header: 'bg-white shadow-md',
+  // Header/Top bar - gradiente rosa a amarillo
+  topBar: 'bg-gradient-to-r from-pink-500 via-pink-400 to-yellow-300',
+  header: 'bg-white shadow-lg',
   
-  // Buttons
-  buttonPrimary: 'bg-pink-600 hover:bg-pink-700 text-white',
-  buttonSecondary: 'bg-yellow-400 hover:bg-yellow-500 text-gray-900',
+  // Buttons - estilo del botón "Visítanos Ahora"
+  buttonPrimary: 'bg-pink-500 hover:bg-pink-600 text-white rounded-full shadow-lg',
+  buttonSecondary: 'bg-yellow-400 hover:bg-yellow-500 text-gray-900 rounded-full',
   
-  // Hero
-  hero: 'bg-gradient-to-br from-pink-600 via-pink-500 to-yellow-400',
+  // Hero - fondo azul como el logo
+  hero: 'bg-gradient-to-br from-blue-800 via-blue-700 to-pink-500',
   
   // Cards
-  card: 'bg-white rounded-2xl shadow-lg border-2 border-pink-100',
+  card: 'bg-white rounded-2xl shadow-lg border border-pink-100',
   
   // Text
-  textPrimary: 'text-pink-600',
-  textSecondary: 'text-yellow-500',
+  textPrimary: 'text-pink-500',
+  textSecondary: 'text-blue-800',
   
-  // Category colors
+  // Category colors - más vibrantes
   categoryColors: {
-    "gaseosas": "from-red-500 to-pink-600",
+    "gaseosas": "from-red-500 to-pink-500",
     "snacks": "from-yellow-400 to-orange-500",
     "dulces": "from-pink-400 to-pink-600",
-    "gomas": "from-purple-400 to-pink-500",
-    "chocolates": "from-amber-600 to-yellow-500",
+    "gomas": "from-purple-500 to-pink-500",
+    "chocolates": "from-amber-600 to-yellow-400",
     "ancheteria": "from-green-400 to-yellow-400",
     "confiteria": "from-cyan-400 to-pink-400",
-    "licores": "from-indigo-600 to-pink-600",
+    "licores": "from-blue-700 to-pink-600",
     "galletas": "from-orange-300 to-yellow-400",
     "lacteos": "from-blue-300 to-pink-300",
   },
 };
 
-// Slogan
+// Slogan oficial
 export const SLOGAN = "Surtiendo Felicidad!!!";

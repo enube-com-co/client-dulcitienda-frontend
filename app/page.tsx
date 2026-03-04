@@ -45,12 +45,12 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Top Bar - Dulcitienda colors */}
-      <div className="bg-gradient-to-r from-pink-600 via-pink-500 to-yellow-400 text-white text-sm py-2">
+      {/* Top Bar - Exact Dulcitienda colors */}
+      <div className="bg-gradient-to-r from-pink-500 via-pink-400 to-yellow-300 text-white text-sm py-2">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
-          <p className="font-medium">🚚 Envío gratis en Neiva en pedidos mayores a $200.000</p>
+          <p className="font-bold">🚚 Envío gratis en Neiva en pedidos mayores a $200.000</p>
           <div className="hidden md:flex items-center gap-6">
-            <a href="tel:+573132309867" className="flex items-center gap-2 hover:text-yellow-200 transition-colors">
+            <a href="tel:+573132309867" className="flex items-center gap-2 hover:text-yellow-100 transition-colors">
               <Phone size={14} /> +57 313 2309867
             </a>
             <span className="text-white/50">|</span>
@@ -63,16 +63,16 @@ export default function Home() {
       <header className="bg-white shadow-md sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
-            {/* Logo with Dulcitienda style */}
+            {/* Logo with Dulcitienda exact style */}
             <Link href="/" className="flex items-center gap-3">
-              <div className="w-14 h-14 bg-gradient-to-br from-pink-500 via-pink-600 to-yellow-400 rounded-2xl flex items-center justify-center text-2xl shadow-lg border-2 border-yellow-300">
+              <div className="w-14 h-14 bg-gradient-to-br from-pink-400 via-pink-500 to-yellow-300 rounded-2xl flex items-center justify-center text-2xl shadow-lg border-2 border-yellow-200">
                 🍬
               </div>
               <div>
-                <h1 className="text-2xl font-extrabold bg-gradient-to-r from-pink-600 via-pink-500 to-yellow-500 bg-clip-text text-transparent">
+                <h1 className="text-2xl font-black bg-gradient-to-r from-pink-500 via-pink-400 to-yellow-400 bg-clip-text text-transparent">
                   Dulcitienda
                 </h1>
-                <p className="text-xs font-medium text-pink-500 -mt-1">{SLOGAN}</p>
+                <p className="text-xs font-bold text-pink-500 -mt-1">{SLOGAN}</p>
               </div>
             </Link>
 
@@ -135,8 +135,8 @@ export default function Home() {
         )}
       </header>
 
-      {/* Hero - Dulcitienda colors */}
-      <section className="relative bg-gradient-to-br from-pink-600 via-pink-500 to-yellow-400 text-white overflow-hidden">
+      {/* Hero - Fondo azul como el logo oficial */}
+      <section className="relative bg-gradient-to-br from-blue-800 via-blue-700 to-pink-500 text-white overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute inset-0" style={{
             backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
@@ -146,7 +146,7 @@ export default function Home() {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
-              <span className="inline-block px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-sm font-bold mb-6 border border-white/30">
+              <span className="inline-block px-4 py-2 bg-pink-500/20 backdrop-blur-sm rounded-full text-sm font-bold mb-6 border border-pink-300/30">
                 ✨ {SLOGAN}
               </span>
               <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
@@ -157,12 +157,12 @@ export default function Home() {
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Link href="/catalogo">
-                  <button className="px-8 py-4 bg-white text-pink-600 rounded-full font-bold text-lg shadow-xl hover:shadow-2xl hover:scale-105 transition-all flex items-center justify-center gap-2">
+                  <button className="px-8 py-4 bg-pink-500 hover:bg-pink-600 text-white rounded-full font-bold text-lg shadow-xl hover:shadow-2xl hover:scale-105 transition-all flex items-center justify-center gap-2">
                     Ver Catálogo <ChevronRight size={20} />
                   </button>
                 </Link>
                 <a href="https://wa.me/573132309867">
-                  <button className="px-8 py-4 bg-yellow-400 text-gray-900 rounded-full font-bold text-lg shadow-xl hover:shadow-2xl hover:scale-105 transition-all">
+                  <button className="px-8 py-4 bg-yellow-300 hover:bg-yellow-400 text-blue-900 rounded-full font-bold text-lg shadow-xl hover:shadow-2xl hover:scale-105 transition-all">
                     💬 Pedir por WhatsApp
                   </button>
                 </a>
@@ -337,8 +337,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="py-16 bg-gradient-to-r from-pink-600 via-pink-500 to-yellow-400 text-white">
+      {/* CTA - Colores exactos del logo */}
+      <section className="py-16 bg-gradient-to-r from-blue-800 via-blue-700 to-pink-500 text-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
             ¿Listo para surtir tu negocio?
@@ -348,12 +348,12 @@ export default function Home() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a href="https://wa.me/573132309867">
-              <button className="px-8 py-4 bg-yellow-400 text-gray-900 rounded-full font-bold text-lg shadow-xl hover:shadow-2xl hover:scale-105 transition-all flex items-center justify-center gap-2">
+              <button className="px-8 py-4 bg-pink-500 hover:bg-pink-600 text-white rounded-full font-bold text-lg shadow-xl hover:shadow-2xl hover:scale-105 transition-all flex items-center justify-center gap-2">
                 💬 WhatsApp
               </button>
             </a>
             <a href="tel:+573132309867">
-              <button className="px-8 py-4 bg-white text-pink-600 rounded-full font-bold text-lg shadow-xl hover:shadow-2xl hover:scale-105 transition-all flex items-center justify-center gap-2">
+              <button className="px-8 py-4 bg-yellow-300 hover:bg-yellow-400 text-blue-900 rounded-full font-bold text-lg shadow-xl hover:shadow-2xl hover:scale-105 transition-all flex items-center justify-center gap-2">
                 📞 Llamar
               </button>
             </a>
