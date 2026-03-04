@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { Id } from "@/convex/_generated/dataModel";
 import Link from "next/link";
 import { Search, ShoppingCart, Menu, X, Phone, Filter, Grid3X3, List, ChevronRight, Heart, Eye } from "lucide-react";
 
@@ -10,7 +11,7 @@ export default function Catalogo() {
   const [mounted, setMounted] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<Id<"categories"> | null>(null);
   
   const products = useQuery(api.products.getProducts, { 
     categoryId: selectedCategory || undefined,
