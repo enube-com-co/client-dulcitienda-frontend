@@ -1,4 +1,5 @@
 import { mutation } from "./_generated/server";
+import { v } from "convex/values";
 
 // Seed massive product catalog (500+ products)
 export const seedMassive = mutation({
