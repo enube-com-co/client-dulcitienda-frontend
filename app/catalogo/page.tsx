@@ -209,7 +209,7 @@ export default function Catalogo() {
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-6">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <p className="text-gray-600">
-                  Mostrando <span className="font-bold text-gray-800">{products?.length || 0}</span> productos
+                  Mostrando <span className="font-bold text-gray-800">{products?.page?.length || 0}</span> productos
                 </p>
                 <div className="flex items-center gap-4">
                   <select className="border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-pink-500">
@@ -238,7 +238,7 @@ export default function Catalogo() {
 
             {/* Products */}
             <div className={`grid ${viewMode === "grid" ? 'grid-cols-2 md:grid-cols-3 lg:grid-cols-3' : 'grid-cols-1'} gap-6`}>
-              {products?.map((product) => (
+              {products?.page?.map((product) => (
                 <div key={product._id} className="group bg-white rounded-2xl shadow-sm border border-gray-100 hover:shadow-xl transition-all duration-300 overflow-hidden">
                   <div className="relative">
                     <Link href={`/producto/${product.sku}`}>
@@ -307,7 +307,7 @@ export default function Catalogo() {
             </div>
 
             {/* Pagination */}
-            {products && products.length > 0 && (
+            {products?.page && products.page.length > 0 && (
               <div className="mt-8 flex justify-center">
                 <div className="flex items-center gap-2">
                   <button className="px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50">
