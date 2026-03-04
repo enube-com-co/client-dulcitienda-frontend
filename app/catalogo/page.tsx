@@ -122,7 +122,7 @@ export default function Catalogo() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Top Bar */}
-      <div className="bg-pink-600 text-white text-sm py-2">
+      <div className="bg-gradient-to-r from-pink-600 via-pink-500 to-yellow-400 text-white text-sm py-2">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
           <p>🚚 Envío gratis en Neiva en pedidos mayores a $200.000</p>
           <div className="hidden md:flex items-center gap-6">
@@ -156,7 +156,7 @@ export default function Catalogo() {
                   placeholder="Buscar productos..."
                   className="w-full pl-4 pr-12 py-3 border-2 border-gray-200 rounded-full focus:border-pink-500 focus:outline-none transition-colors"
                 />
-                <button className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-pink-500 text-white rounded-full flex items-center justify-center hover:bg-pink-600 transition-colors">
+                <button className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-pink-500 text-white rounded-full flex items-center justify-center hover:bg-gradient-to-r from-pink-600 via-pink-500 to-yellow-400 transition-colors">
                   <Search size={18} />
                 </button>
               </div>
@@ -388,7 +388,7 @@ export default function Catalogo() {
                         className={`w-full py-3 rounded-xl font-medium flex items-center justify-center gap-2 transition-all ${
                           isAdded
                             ? 'bg-green-500 text-white'
-                            : 'bg-pink-500 text-white hover:bg-pink-600'
+                            : 'bg-pink-500 text-white hover:bg-gradient-to-r from-pink-600 via-pink-500 to-yellow-400'
                         }`}
                       >
                         {isAdded ? (

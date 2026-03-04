@@ -82,7 +82,7 @@ export default function BuscarPage() {
       </header>
 
       {/* Search Section */}
-      <div className="bg-pink-600 py-12">
+      <div className="bg-gradient-to-r from-pink-600 via-pink-500 to-yellow-400 py-12">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           <h1 className="text-3xl font-bold text-white text-center mb-6">Buscar Productos</h1>
           <div className="relative">

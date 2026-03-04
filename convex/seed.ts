@@ -137,7 +137,7 @@ export const seedProducts = mutation({
         warehouseId: (await ctx.db.insert("warehouses", {
           name: "Bodega Principal",
           code: "BDG-001",
-          address: { street: "Calle 123", city: "Bogotá", state: "Cundinamarca", zip: "110111" },
+          address: { street: "Calle 123", city: "Neiva", state: "Cundinamarca", zip: "110111" },
           isActive: true,
         })),
         quantityAvailable: Math.floor(Math.random() * 500) + 100,
@@ -280,7 +280,7 @@ export const seedAll = mutation({
         warehouseId: (await ctx.db.insert("warehouses", {
           name: "Bodega Principal",
           code: "BDG-001",
-          address: { street: "Calle 123", city: "Bogotá", state: "Cundinamarca", zip: "110111" },
+          address: { street: "Calle 123", city: "Neiva", state: "Cundinamarca", zip: "110111" },
           isActive: true,
         })),
         quantityAvailable: Math.floor(Math.random() * 500) + 100,

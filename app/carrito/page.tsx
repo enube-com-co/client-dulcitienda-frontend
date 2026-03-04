@@ -81,7 +81,7 @@ export default function CarritoPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Top Bar */}
-      <div className="bg-pink-600 text-white text-sm py-2">
+      <div className="bg-gradient-to-r from-pink-600 via-pink-500 to-yellow-400 text-white text-sm py-2">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
           <p>🚚 Envío gratis en Neiva en pedidos mayores a $200.000</p>
           <div className="hidden md:flex items-center gap-6">
@@ -140,7 +140,7 @@ export default function CarritoPage() {
             <h2 className="text-2xl font-bold text-gray-800 mb-2">Tu carrito está vacío</h2>
             <p className="text-gray-500 mb-6">¡Agrega algunos productos para comenzar tu pedido!</p>
             <Link href="/catalogo">
-              <button className="px-8 py-4 bg-pink-500 text-white rounded-full font-bold hover:bg-pink-600 transition-colors">
+              <button className="px-8 py-4 bg-pink-500 text-white rounded-full font-bold hover:bg-gradient-to-r from-pink-600 via-pink-500 to-yellow-400 transition-colors">
                 Ver catálogo
               </button>
             </Link>
