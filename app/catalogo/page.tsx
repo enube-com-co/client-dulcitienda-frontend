@@ -13,7 +13,7 @@ export default function Catalogo() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   
   const products = useQuery(api.products.getProducts, { 
-    categoryId: selectedCategory,
+    categoryId: selectedCategory || undefined,
     limit: 100 
   });
   const categories = useQuery(api.products.getCategories);
