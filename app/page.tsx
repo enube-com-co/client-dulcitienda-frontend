@@ -46,13 +46,13 @@ export default function Home() {
       {/* Top Bar */}
       <div className="bg-pink-600 text-white text-sm py-2">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
-          <p>🚚 Envío gratis en Bogotá en pedidos mayores a $200.000</p>
+          <p>🚚 Envío gratis en Neiva en pedidos mayores a $200.000</p>
           <div className="hidden md:flex items-center gap-6">
-            <a href="tel:+573203555663" className="flex items-center gap-2 hover:text-pink-200">
-              <Phone size={14} /> +57 320 355 5663
+            <a href="tel:+573132309867" className="flex items-center gap-2 hover:text-pink-200">
+              <Phone size={14} /> +57 313 2309867
             </a>
             <span className="text-pink-400">|</span>
-            <span>cra.19a#12-63, Bogotá</span>
+            <span>Cra 3 # 7-12 Centro, Neiva</span>
           </div>
         </div>
       </div>
@@ -169,7 +169,7 @@ export default function Home() {
                     Ver Catálogo <ChevronRight size={20} />
                   </button>
                 </Link>
-                <a href="https://wa.me/573203555663">
+                <a href="https://wa.me/573132309867">
                   <button className="px-8 py-4 bg-green-500 text-white rounded-full font-bold text-lg shadow-xl hover:shadow-2xl hover:scale-105 transition-all">
                     💬 Pedir por WhatsApp
                   </button>
@@ -201,7 +201,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {[
-              { icon: Truck, title: "Envío Gratis", desc: "En Bogotá +$200k" },
+              { icon: Truck, title: "Envío Gratis", desc: "En Neiva +$200k" },
               { icon: Shield, title: "Garantía", desc: "Productos frescos" },
               { icon: Clock, title: "Entrega Rápida", desc: "24-48 horas" },
               { icon: Star, title: "Calidad", desc: "Marcas originales" },
@@ -333,7 +333,7 @@ export default function Home() {
             <div className="grid grid-cols-2 gap-4">
               {[
                 { icon: "🏆", title: "Calidad Garantizada", desc: "Productos originales" },
-                { icon: "🚚", title: "Entrega Rápida", desc: "24-48 horas en Bogotá" },
+                { icon: "🚚", title: "Entrega Rápida", desc: "24-48 horas en Neiva" },
                 { icon: "👥", title: "Atención 24/7", desc: "Soporte personalizado" },
                 { icon: "💰", title: "Mejores Precios", desc: "Precios de mayorista" },
               ].map((item, idx) => (
@@ -358,12 +358,12 @@ export default function Home() {
             Contáctanos y recibe atención personalizada para tu pedido
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a href="https://wa.me/573203555663">
+            <a href="https://wa.me/573132309867">
               <button className="px-8 py-4 bg-green-500 text-white rounded-full font-bold text-lg shadow-xl hover:shadow-2xl hover:scale-105 transition-all flex items-center justify-center gap-2">
                 💬 WhatsApp
               </button>
             </a>
-            <a href="tel:+573203555663">
+            <a href="tel:+573132309867">
               <button className="px-8 py-4 bg-white text-pink-600 rounded-full font-bold text-lg shadow-xl hover:shadow-2xl hover:scale-105 transition-all flex items-center justify-center gap-2">
                 📞 Llamar
               </button>
@@ -405,13 +405,13 @@ export default function Home() {
               <h3 className="font-bold text-lg mb-4">Contacto</h3>
               <ul className="space-y-3 text-gray-400">
                 <li className="flex items-center gap-2">
-                  <MapPin size={16} /> Cra. 19a #12-63, Bogotá
+                  <MapPin size={16} /> Cra 3 # 7-12 Centro, Neiva
                 </li>
                 <li className="flex items-center gap-2">
-                  <Phone size={16} /> +57 320 355 5663
+                  <Phone size={16} /> +57 313 2309867
                 </li>
                 <li className="flex items-center gap-2">
-                  <Mail size={16} /> dulcitienda@enube.com.co
+                  <Mail size={16} /> dulcitiendajm@gmail.com
                 </li>
               </ul>
             </div>

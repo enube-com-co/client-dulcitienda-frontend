@@ -39,9 +39,9 @@ export default function Catalogo() {
       {/* Top Bar */}
       <div className="bg-pink-600 text-white text-sm py-2">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
-          <p>🚚 Envío gratis en Bogotá en pedidos mayores a $200.000</p>
+          <p>🚚 Envío gratis en Neiva en pedidos mayores a $200.000</p>
           <div className="hidden md:flex items-center gap-6">
-            <a href="tel:+573203555663" className="flex items-center gap-2 hover:text-pink-200">
+            <a href="tel:+573132309867" className="flex items-center gap-2 hover:text-pink-200">
               <Phone size={14} /> +57 320 355 5663
             </a>
           </div>

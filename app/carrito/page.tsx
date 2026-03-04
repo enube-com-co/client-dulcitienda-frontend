@@ -83,9 +83,9 @@ export default function CarritoPage() {
       {/* Top Bar */}
       <div className="bg-pink-600 text-white text-sm py-2">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
-          <p>🚚 Envío gratis en Bogotá en pedidos mayores a $200.000</p>
+          <p>🚚 Envío gratis en Neiva en pedidos mayores a $200.000</p>
           <div className="hidden md:flex items-center gap-6">
-            <a href="tel:+573203555663" className="flex items-center gap-2 hover:text-pink-200">
+            <a href="tel:+573132309867" className="flex items-center gap-2 hover:text-pink-200">
               <Phone size={14} /> +57 320 355 5663
             </a>
           </div>
@@ -245,7 +245,7 @@ export default function CarritoPage() {
                   </div>
                 </div>
                 
-                <a href="https://wa.me/573203555663?text=Hola, quiero hacer un pedido:%0A%0A${encodeURIComponent(cart.map(item => `${item.name} x${item.quantity} - $${(item.price * item.quantity).toLocaleString()}`).join('%0A'))}%0A%0ATotal: $${total.toLocaleString()}">
+                <a href="https://wa.me/573132309867?text=Hola, quiero hacer un pedido:%0A%0A${encodeURIComponent(cart.map(item => `${item.name} x${item.quantity} - $${(item.price * item.quantity).toLocaleString()}`).join('%0A'))}%0A%0ATotal: $${total.toLocaleString()}">
                   <button className="w-full py-4 bg-green-500 text-white rounded-xl font-bold text-lg hover:bg-green-600 transition-colors flex items-center justify-center gap-2">
                     💬 Pedir por WhatsApp
                   </button>
