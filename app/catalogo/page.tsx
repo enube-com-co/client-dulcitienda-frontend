@@ -6,7 +6,7 @@ import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import Link from "next/link";
 import { Search, ShoppingCart, Menu, X, Phone, Filter, Grid3X3, List, ChevronRight, Heart, Eye, Check } from "lucide-react";
-import { getProductImage, categoryColors } from "@/lib/product-images";
+import { getProductImageUrl, categoryColors } from "@/lib/product-images";
 
 interface CartItem {
   productId: string;
@@ -309,7 +309,7 @@ export default function Catalogo() {
             <div className={`grid ${viewMode === "grid" ? 'grid-cols-2 md:grid-cols-3 lg:grid-cols-3' : 'grid-cols-1'} gap-6`}>
               {products?.page?.map((product) => {
                 const categorySlug = getCategorySlug(product.categoryId);
-                const image = getProductImage(categorySlug, product.name);
+                const imageData = getProductImageUrl(product.name, categorySlug);
                 const isAdded = addedProduct === product._id;
                 
                 return (
@@ -317,7 +317,18 @@ export default function Catalogo() {
                     <div className="relative">
                       <Link href={`/producto/${product.sku}`}>
                         <div className={`bg-gradient-to-br ${categoryColors[categorySlug] || 'from-gray-100 to-gray-200'} flex items-center justify-center group-hover:opacity-90 transition-opacity ${viewMode === "grid" ? 'aspect-square' : 'h-48'}`}>
-                          <span className="text-6xl group-hover:scale-110 transition-transform duration-300">{image}</span>
+                          {imageData.isReal ? (
+                            <img 
+                              src={imageData.url} 
+                              alt={product.name}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).src = imageData.fallback;
+                              }}
+                            />
+                          ) : (
+                            <span className="text-6xl group-hover:scale-110 transition-transform duration-300">{imageData.url}</span>
+                          )}
                         </div>
                       </Link>
                       
