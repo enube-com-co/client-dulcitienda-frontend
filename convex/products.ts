@@ -20,14 +20,21 @@ export const getProducts = query({
   },
 });
 
-// Search products
+// Search products (fallback without search index)
 export const searchProducts = query({
   args: { query: v.string() },
   handler: async (ctx, args) => {
-    return await ctx.db.query("products")
-      .withSearchIndex("search_name", (q) => q.search("name", args.query))
+    const searchTerm = args.query.toLowerCase();
+    
+    // Get all active products and filter in memory
+    const allProducts = await ctx.db.query("products")
       .filter((q) => q.eq(q.field("isActive"), true))
-      .take(20);
+      .take(500);
+    
+    return allProducts.filter(p => 
+      p.name.toLowerCase().includes(searchTerm) ||
+      p.sku.toLowerCase().includes(searchTerm)
+    ).slice(0, 20);
   },
 });
 

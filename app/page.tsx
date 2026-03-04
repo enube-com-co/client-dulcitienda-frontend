@@ -76,16 +76,14 @@ export default function Home() {
 
             {/* Search - Desktop */}
             <div className="hidden md:flex flex-1 max-w-xl mx-8">
-              <div className="relative w-full">
-                <input
-                  type="text"
-                  placeholder="Buscar productos..."
-                  className="w-full pl-4 pr-12 py-3 border-2 border-gray-200 rounded-full focus:border-pink-500 focus:outline-none transition-colors"
-                />
-                <button className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-pink-500 text-white rounded-full flex items-center justify-center hover:bg-pink-600 transition-colors">
+              <Link href="/buscar" className="relative w-full">
+                <div className="w-full pl-4 pr-12 py-3 border-2 border-gray-200 rounded-full focus-within:border-pink-500 transition-colors bg-white flex items-center">
+                  <span className="text-gray-400">Buscar productos...</span>
+                </div>
+                <div className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-pink-500 text-white rounded-full flex items-center justify-center">
                   <Search size={18} />
-                </button>
-              </div>
+                </div>
+              </Link>
             </div>
 
             {/* Actions */}
