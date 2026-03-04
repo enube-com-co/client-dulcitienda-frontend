@@ -90,10 +90,10 @@ export default function Home() {
 
             {/* Actions */}
             <div className="flex items-center gap-4">
-              <button className="hidden md:flex items-center gap-2 text-gray-700 hover:text-pink-600 transition-colors">
+              <Link href="/carrito" className="hidden md:flex items-center gap-2 text-gray-700 hover:text-pink-600 transition-colors">
                 <ShoppingCart size={24} />
-                <span className="bg-pink-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">0</span>
-              </button>
+                <span className="bg-pink-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center cart-count">0</span>
+              </Link>
               <button 
                 className="md:hidden p-2"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
