@@ -21,6 +21,7 @@ import {
   X,
   Search
 } from "lucide-react";
+import { getProductImage, categoryColors } from "@/lib/product-images";
 
 // Cart context simple
 interface CartItem {

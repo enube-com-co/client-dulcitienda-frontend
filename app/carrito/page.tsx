@@ -245,9 +245,20 @@ export default function CarritoPage() {
                   </div>
                 </div>
                 
-                <a href="https://wa.me/573132309867?text=Hola, quiero hacer un pedido:%0A%0A${encodeURIComponent(cart.map(item => `${item.name} x${item.quantity} - $${(item.price * item.quantity).toLocaleString()}`).join('%0A'))}%0A%0ATotal: $${total.toLocaleString()}">
+                <a href={`https://wa.me/573132309867?text=${encodeURIComponent(
+                  `¡Hola! Quiero hacer un pedido en Dulcitienda:%0A%0A` +
+                  cart.map((item, i) => `${i + 1}. ${item.name}%0A   SKU: ${item.sku}%0A   Cantidad: ${item.quantity} unidades%0A   Precio unitario: $${item.price.toLocaleString()}%0A   Subtotal: $${(item.price * item.quantity).toLocaleString()}%0A`).join('%0A') +
+                  `%0A--------------------------------%0A` +
+                  `Subtotal: $${subtotal.toLocaleString()}%0A` +
+                  `Envío: ${shipping === 0 ? 'GRATIS' : '$' + shipping.toLocaleString()}%0A` +
+                  `TOTAL: $${total.toLocaleString()}%0A%0A` +
+                  `Por favor confirmar disponibilidad y método de pago. ¡Gracias!`
+                )}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   <button className="w-full py-4 bg-green-500 text-white rounded-xl font-bold text-lg hover:bg-green-600 transition-colors flex items-center justify-center gap-2">
-                    💬 Pedir por WhatsApp
+                    💬 Enviar pedido por WhatsApp
                   </button>
                 </a>
                 
