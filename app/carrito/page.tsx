@@ -246,12 +246,12 @@ export default function CarritoPage() {
                 </div>
                 
                 <a href={`https://wa.me/573132309867?text=${encodeURIComponent(
-                  `¡Hola! Quiero hacer un pedido en Dulcitienda:%0A%0A` +
-                  cart.map((item, i) => `${i + 1}. ${item.name}%0A   SKU: ${item.sku}%0A   Cantidad: ${item.quantity} unidades%0A   Precio unitario: $${item.price.toLocaleString()}%0A   Subtotal: $${(item.price * item.quantity).toLocaleString()}%0A`).join('%0A') +
-                  `%0A--------------------------------%0A` +
-                  `Subtotal: $${subtotal.toLocaleString()}%0A` +
-                  `Envío: ${shipping === 0 ? 'GRATIS' : '$' + shipping.toLocaleString()}%0A` +
-                  `TOTAL: $${total.toLocaleString()}%0A%0A` +
+                  `¡Hola! Quiero hacer un pedido en Dulcitienda:\n\n` +
+                  cart.map((item, i) => `${i + 1}. ${item.name}\n   SKU: ${item.sku}\n   Cantidad: ${item.quantity} unidades\n   Precio unitario: $${item.price.toLocaleString()}\n   Subtotal: $${(item.price * item.quantity).toLocaleString()}`).join('\n\n') +
+                  `\n\n--------------------------------\n` +
+                  `Subtotal: $${subtotal.toLocaleString()}\n` +
+                  `Envío: ${shipping === 0 ? 'GRATIS' : '$' + shipping.toLocaleString()}\n` +
+                  `*TOTAL: $${total.toLocaleString()}*\n\n` +
                   `Por favor confirmar disponibilidad y método de pago. ¡Gracias!`
                 )}`}
                   target="_blank"
