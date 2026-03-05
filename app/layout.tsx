@@ -111,8 +111,8 @@ export default function RootLayout({
               url: "https://dulcitienda.com.co",
               logo: "https://dulcitienda.com.co/logo.png",
               sameAs: [
-                "https://www.facebook.com/dulcitienda",
-                "https://www.instagram.com/midulcitienda",
+                "https://web.facebook.com/dulcitienda/?locale=es_LA",
+                "https://www.instagram.com/midulcitienda/?hl=es",
               ],
               contactPoint: {
                 "@type": "ContactPoint",

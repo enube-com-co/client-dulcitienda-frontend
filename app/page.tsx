@@ -408,11 +408,12 @@ export default function Home() {
             <div>
               <h3 className="font-bold text-lg mb-4">Síguenos</h3>
               <div className="flex gap-3">
-                {["Facebook", "Instagram", "WhatsApp"].map((social) => (
-                  <a key={social} href="#" className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-gradient-to-r hover:from-pink-500 hover:to-yellow-400 transition-all text-sm">
-                    {social[0]}
-                  </a>
-                ))}
+                <a href="https://web.facebook.com/dulcitienda/?locale=es_LA" target="_blank" rel="noopener noreferrer" className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-gradient-to-r hover:from-pink-500 hover:to-yellow-400 transition-all text-sm">
+                  F
+                </a>
+                <a href="https://www.instagram.com/midulcitienda/?hl=es" target="_blank" rel="noopener noreferrer" className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-gradient-to-r hover:from-pink-500 hover:to-yellow-400 transition-all text-sm">
+                  I
+                </a>
               </div>
             </div>
           </div>
