@@ -55,7 +55,7 @@ export function validateSearchQuery(query: string): { valid: boolean; error?: st
     return { valid: true, sanitized };
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return { valid: false, error: error.errors[0].message };
+      return { valid: false, error: error.issues[0]?.message || 'Error de validación' };
     }
     return { valid: false, error: 'Error de validación' };
   }
@@ -68,7 +68,7 @@ export function validateCartItem(item: unknown): { valid: boolean; error?: strin
     return { valid: true, data };
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return { valid: false, error: error.errors[0].message };
+      return { valid: false, error: error.issues[0]?.message || 'Error de validación' };
     }
     return { valid: false, error: 'Error de validación' };
   }
