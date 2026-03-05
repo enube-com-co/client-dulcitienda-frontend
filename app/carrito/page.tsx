@@ -9,12 +9,11 @@ import {
   Minus, 
   ChevronRight,
   Phone,
-  Menu,
   X,
-  Search,
   ArrowLeft,
   Package
 } from "lucide-react";
+import { validateCartItem } from "@/lib/validation";
 
 interface CartItem {
   productId: string;
@@ -34,7 +33,23 @@ export default function CarritoPage() {
     setMounted(true);
     const saved = localStorage.getItem('dulcitienda-cart');
     if (saved) {
-      setCart(JSON.parse(saved));
+      try {
+        const parsed = JSON.parse(saved);
+        // Validate cart items
+        if (Array.isArray(parsed)) {
+          const validItems = parsed.filter(item => {
+            const validation = validateCartItem(item);
+            return validation.valid;
+          });
+          setCart(validItems);
+          // Save filtered cart back to localStorage
+          localStorage.setItem('dulcitienda-cart', JSON.stringify(validItems));
+        }
+      } catch {
+        // Invalid JSON, clear cart
+        localStorage.removeItem('dulcitienda-cart');
+        setCart([]);
+      }
     }
   }, []);
   

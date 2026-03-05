@@ -6,6 +6,7 @@ import { api } from "@/convex/_generated/api";
 import Link from "next/link";
 import { Search, ShoppingCart, X, ChevronRight } from "lucide-react";
 import { getProductImageUrl, categoryColors } from "@/lib/product-images";
+import { validateSearchQuery, sanitizeString } from "@/lib/validation";
 
 interface CartItem {
   productId: string;
