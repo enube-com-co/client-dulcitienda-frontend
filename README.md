@@ -235,12 +235,14 @@ Ver [`docs/SECURITY_AUDIT.md`](./docs/SECURITY_AUDIT.md) para auditoría complet
 
 | Documento | Descripción |
 |-----------|-------------|
+| [`BACKEND.md`](./BACKEND.md) | Documentación del backend (Convex) - Schema, API, Real-time |
 | [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) | Arquitectura técnica detallada |
 | [`docs/API_INTEGRATION.md`](./docs/API_INTEGRATION.md) | Integraciones externas |
 | [`docs/DEPLOYMENT.md`](./docs/DEPLOYMENT.md) | Guía de deployment |
 | [`docs/SECURITY_AUDIT.md`](./docs/SECURITY_AUDIT.md) | Auditoría de seguridad |
 | [`docs/STYLING.md`](./docs/STYLING.md) | Guía de estilos |
 | [`docs/COMPONENTS.md`](./docs/COMPONENTS.md) | Documentación de componentes |
+| [`docs/DIAGRAMS.md`](./docs/DIAGRAMS.md) | Diagramas de arquitectura (Mermaid) |
 
 ---
 
