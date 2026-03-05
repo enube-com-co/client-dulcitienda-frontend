@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Security Headers - Temporary permissive for debugging
+  // Security Headers - Balanced for Next.js 16 + Turbopack
   async headers() {
     return [
       {
@@ -9,7 +9,17 @@ const nextConfig: NextConfig = {
         headers: [
           {
             key: 'Content-Security-Policy',
-            value: "default-src * 'unsafe-inline' 'unsafe-eval'; script-src * 'unsafe-inline' 'unsafe-eval'; style-src * 'unsafe-inline'; img-src * data: blob:; font-src *; connect-src *; frame-ancestors 'none';",
+            value: [
+              "default-src 'self'",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://ceaseless-ibis-857.convex.cloud",
+              "style-src 'self' 'unsafe-inline'",
+              "img-src 'self' https://images.unsplash.com https://images.pexels.com data: blob:",
+              "font-src 'self'",
+              "connect-src 'self' https://ceaseless-ibis-857.convex.cloud wss://ceaseless-ibis-857.convex.cloud",
+              "frame-ancestors 'none'",
+              "base-uri 'self'",
+              "form-action 'self'",
+            ].join('; '),
           },
           { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
           { key: 'X-Content-Type-Options', value: 'nosniff' },
