@@ -1,416 +1,352 @@
-# Architecture Documentation
+# 🏗️ Arquitectura Dulcitienda
 
-## System Architecture
+Documentación técnica completa de la arquitectura.
 
-Dulcitienda follows a modern full-stack architecture using Next.js App Router with Convex as the backend-as-a-service platform.
+---
+
+## 📊 Diagrama de Arquitectura General
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                    Client Layer                             │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      │
-│  │   Browser    │  │   Mobile     │  │   Tablet     │      │
-│  │   (Chrome)   │  │   (Safari)   │  │   (Any)      │      │
-│  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘      │
-└─────────┼────────────────┼────────────────┼───────────────┘
-          │                │                │
-          └────────────────┴────────────────┘
-                           │
-                    ┌──────▼────────┐
-                    │  Vercel Edge  │
-                    │   Network     │
-                    └──────┬────────┘
-                           │
-┌──────────────────────────▼──────────────────────────────────┐
-│                   Next.js Application                       │
-│  ┌─────────────────────────────────────────────────────┐   │
-│  │              App Router (Next.js 16)                │   │
-│  │  ┌────────────┐ ┌────────────┐ ┌────────────────┐   │   │
-│  │  │  Server    │ │   Client   │ │     RSC        │   │   │
-│  │  │ Components │ │ Components │ │   (Static)     │   │   │
-│  │  └────────────┘ └────────────┘ └────────────────┘   │   │
-│  └─────────────────────────────────────────────────────┘   │
-│                         │                                   │
-│  ┌──────────────────────▼──────────────────────────────┐   │
-│  │              Convex React Client                    │   │
-│  │         (useQuery, useMutation hooks)               │   │
-│  └──────────────────────┬──────────────────────────────┘   │
-└─────────────────────────┼───────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────┐
+│                              CLIENTE                                     │
+│  ┌─────────────────────────────────────────────────────────────────┐   │
+│  │                     Navegador Web                                │   │
+│  │  ┌────────────┐  ┌────────────┐  ┌────────────────────────┐   │   │
+│  │  │  Next.js   │  │   React    │  │    Tailwind + shadcn   │   │   │
+│  │  │  (Pages)   │  │   (UI)     │  │      (Styling)         │   │   │
+│  │  └────────────┘  └────────────┘  └────────────────────────┘   │   │
+│  └─────────────────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    │ HTTPS
+                                    ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│                         VERCEL EDGE NETWORK                            │
+│  ┌─────────────────────────────────────────────────────────────────┐   │
+│  │  • Static Site Generation (SSG)                                  │   │
+│  │  • Incremental Static Regeneration (ISR)                         │   │
+│  │  • Edge Functions (Middleware)                                   │   │
+│  │  • Global CDN (Cache)                                            │   │
+│  │  • Auto-scaling                                                  │   │
+│  └─────────────────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    │ WebSocket / HTTP
+                                    ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│                      CONVEX (Backend Serverless)                       │
+│  ┌─────────────────────────────────────────────────────────────────┐   │
+│  │  ┌────────────┐  ┌────────────┐  ┌────────────────────────┐   │   │
+│  │  │  Queries   │  │  Mutations │  │    Real-time Subs      │   │   │
+│  │  └────────────┘  └────────────┘  └────────────────────────┘   │   │
+│  │                                                                  │   │
+│  │  ┌──────────────────────────────────────────────────────────┐   │   │
+│  │  │                   Database (NoSQL)                        │   │   │
+│  │  │  • products (550 docs)                                    │   │   │
+│  │  │  • categories (10 docs)                                   │   │   │
+│  │  │  • orders (variable)                                      │   │   │
+│  │  └──────────────────────────────────────────────────────────┘   │   │
+│  └─────────────────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    │ (Futuro)
+                                    ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│                      SERVICIOS EXTERNOS                                │
+│  ┌────────────┐  ┌────────────┐  ┌────────────┐  ┌────────────────┐   │
+│  │  WhatsApp  │  │ Cloudinary │  │   Google   │  │   Analytics    │   │
+│  │    API     │  │  (Images)  │  │    OAuth   │  │   (Vercel)     │   │
+│  └────────────┘  └────────────┘  └────────────┘  └────────────────┘   │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 🔄 Flujo de Datos
+
+### 1. Página de Producto (SSG)
+
+```
+Usuario → Vercel CDN → Next.js (Static) → Convex (initial data)
+                                              ↓
+                    Real-time updates ← WebSocket ←
+```
+
+### 2. Checkout (WhatsApp)
+
+```
+Carrito → Validación → Generar mensaje → API WhatsApp → Redirección
+   ↓           ↓             ↓                ↓
+  Zod      TypeScript    Template          wa.me/link
+```
+
+### 3. Actualización de Inventario
+
+```
+Admin (futuro) → Convex Mutation → DB Update → Real-time Push → Cliente
+```
+
+---
+
+## 🗄️ Estructura de Datos
+
+### Relaciones entre Entidades
+
+```
+┌─────────────────┐
+│    categories   │
+│  ─────────────  │
+│  _id: ID        │◄──────┐
+│  name: string   │       │
+│  slug: string   │       │
+│  order: number  │       │
+└─────────────────┘       │
                           │
-                          ▼
-┌─────────────────────────────────────────────────────────────┐
-│                    Convex Platform                          │
-│  ┌─────────────────────────────────────────────────────┐   │
-│  │              Convex Functions                       │   │
-│  │  ┌────────────┐ ┌────────────┐ ┌────────────────┐   │   │
-│  │  │  Queries   │ │ Mutations  │ │    Actions     │   │   │
-│  │  │   (Read)   │ │  (Write)   │ │   (HTTP/Sync)  │   │   │
-│  │  └────────────┘ └────────────┘ └────────────────┘   │   │
-│  └─────────────────────────────────────────────────────┘   │
-│                         │                                   │
-│  ┌──────────────────────▼──────────────────────────────┐   │
-│  │              Convex Database                        │   │
-│  │         (Automatic Indexing & Search)               │   │
-│  └─────────────────────────────────────────────────────┘   │
-└─────────────────────────────────────────────────────────────┘
+         1:N              │
+                          │
+┌─────────────────┐       │
+│    products     │       │
+│  ─────────────  │       │
+│  _id: ID        │       │
+│  sku: string    │       │
+│  name: string   │       │
+│  categoryId: ID │───────┘
+│  basePrice: num │
+│  stock: number  │
+│  images: []     │
+└─────────────────┘
+         │
+         │ N:M (embedded)
+         ▼
+┌─────────────────┐
+│     orders      │
+│  ─────────────  │
+│  _id: ID        │
+│  items: [       │
+│    {            │
+│      productId  │
+│      name       │
+│      price      │
+│      quantity   │
+│    }            │
+│  ]              │
+│  total: number  │
+│  status: enum   │
+└─────────────────┘
 ```
 
 ---
 
-## Component Hierarchy
+## 🛠️ Stack Tecnológico Detallado
 
-### Page Structure
+### Capa de Presentación
 
-```
-RootLayout
-├── ConvexClientProvider (wraps all)
-│   └── Page Content
-│       ├── TopBar (promo banner)
-│       ├── Header
-│       │   ├── Logo
-│       │   ├── SearchDropdown
-│       │   ├── Navigation
-│       │   └── Cart Icon
-│       ├── Main Content (varies by page)
-│       │   ├── Home: Hero → Categories → Featured → About → CTA
-│       │   ├── Catalog: Filters → ProductGrid
-│       │   ├── Product: ImageGallery → Details → Related
-│       │   └── Cart: Items → Summary
-│       └── Footer
-```
+| Tecnología | Versión | Uso |
+|------------|---------|-----|
+| Next.js | 16.1.6 | Framework React, App Router |
+| React | 19.2.4 | Biblioteca UI |
+| React DOM | 19.2.4 | Renderizador |
+| TypeScript | 5.x | Tipado estático |
 
-### Component Tree by Page
+### Capa de Estilos
 
-#### Home Page (`/`)
-```
-Home (Server Component wrapper)
-└── "use client" Home Component
-    ├── TopBar
-    ├── Header
-    │   └── SearchDropdown (Convex query)
-    ├── Hero Section
-    ├── Features Bar
-    ├── Categories Grid
-    ├── Featured Products (Convex query: getFeaturedProducts)
-    ├── About Section
-    ├── CTA Section
-    └── Footer
-```
+| Tecnología | Uso |
+|------------|-----|
+| Tailwind CSS | Utility-first styling |
+| PostCSS | Procesamiento CSS |
+| shadcn/ui | Componentes base accesibles |
+| Lucide React | Iconografía |
+| class-variance-authority | Variantes de componentes |
+| clsx + tailwind-merge | Merge de clases |
 
-#### Catalog Page (`/catalogo`)
-```
-Catalogo (Client Component)
-├── TopBar
-├── Header
-├── Breadcrumb
-├── Sidebar (Filters)
-│   └── Category Filter
-└── ProductGrid (Convex query: getProducts)
-    ├── Toolbar (View toggle, Sort)
-    └── ProductCard (mapped from results)
-```
+### Capa de Datos
 
-#### Product Detail (`/producto/[sku]`)
-```
-ProductoPage (Client Component)
-├── TopBar
-├── Header
-├── Breadcrumb
-├── ProductLayout (2-column)
-│   ├── ImageGallery
-│   └── ProductDetails
-│       ├── PriceCard
-│       ├── Features Grid
-│       ├── QuantitySelector
-│       └── AddToCartButton
-└── RelatedProducts (Convex query)
-```
+| Tecnología | Uso |
+|------------|-----|
+| Convex | Backend serverless + DB |
+| convex/react | Hooks para React |
+| Zod | Validación de schemas |
+
+### Capa de Build/Dev
+
+| Tecnología | Uso |
+|------------|-----|
+| Turbopack | Bundler rápido (Next.js 16) |
+| ESLint | Linting |
+| @convex-dev/eslint-plugin | Reglas específicas Convex |
 
 ---
 
-## Data Flow
-
-### Product Browsing Flow
-
-```
-User Action          Client                    Convex
-    │                  │                         │
-    │ Navigate to /    │                         │
-    │─────────────────▶│                         │
-    │                  │ useQuery(getCategories) │
-    │                  │────────────────────────▶│
-    │                  │                         │ Query DB
-    │                  │◀────────────────────────│
-    │                  │                         │
-    │                  │ useQuery(getFeatured)   │
-    │                  │────────────────────────▶│
-    │                  │                         │ Query DB
-    │                  │◀────────────────────────│
-    │ Render UI        │                         │
-    │◀─────────────────│                         │
-```
-
-### Cart Addition Flow
-
-```
-User Action          Client                    localStorage
-    │                  │                            │
-    │ Click "Add"      │                            │
-    │─────────────────▶│                            │
-    │                  │ addToCart()                │
-    │                  │ update state               │
-    │                  │───────────────────────────▶│
-    │                  │                            │ Save JSON
-    │                  │◀───────────────────────────│
-    │ UI Update        │                            │
-    │◀─────────────────│                            │
-```
-
-### WhatsApp Order Flow
-
-```
-User Action          Cart Page                    WhatsApp
-    │                  │                            │
-    │ Click "Send"     │                            │
-    │─────────────────▶│                            │
-    │                  │ Format cart data           │
-    │                  │ Encode message             │
-    │                  │ Open wa.me link            │
-    │                  │───────────────────────────▶│
-    │                  │                            │ Redirect to
-    │                  │                            │ WhatsApp app
-```
-
----
-
-## State Management
-
-### Client State (React Hooks)
-
-| State | Location | Type | Persistence |
-|-------|----------|------|-------------|
-| Cart | `useCart()` hook | Array of CartItem | localStorage |
-| UI State | Component state | Boolean/Number | None |
-| Search Query | SearchDropdown | String | None |
-| Selected Filters | Catalog page | Object | URL params |
-
-### Server State (Convex)
-
-| Data | Query/Mutation | Real-time |
-|------|----------------|-----------|
-| Products | `products.getProducts` | ✅ Yes |
-| Categories | `products.getCategories` | ✅ Yes |
-| Product Detail | `products.getProduct` | ✅ Yes |
-| Search Results | `products.searchProducts` | ✅ Yes |
-| Orders | `orders.getCustomerOrders` | ✅ Yes |
-
-### State Management Pattern
-
-```typescript
-// Custom hook pattern for cart
-function useCart() {
-  const [cart, setCart] = useState<CartItem[]>([]);
-  
-  // Load from localStorage on mount
-  useEffect(() => {
-    const saved = localStorage.getItem('dulcitienda-cart');
-    if (saved) setCart(JSON.parse(saved));
-  }, []);
-  
-  // Persist on change
-  const addToCart = (item: CartItem) => {
-    setCart(prev => {
-      const newCart = /* logic */;
-      localStorage.setItem('dulcitienda-cart', JSON.stringify(newCart));
-      return newCart;
-    });
-  };
-  
-  return { cart, addToCart };
-}
-```
-
----
-
-## API Integration (Convex)
-
-### Connection Setup
-
-```typescript
-// app/ConvexClientProvider.tsx
-const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
-const convex = new ConvexReactClient(convexUrl);
-
-export function ConvexClientProvider({ children }) {
-  return <ConvexProvider client={convex}>{children}</ConvexProvider>;
-}
-```
-
-### Query Usage Pattern
-
-```typescript
-// In components
-import { useQuery } from "convex/react";
-import { api } from "@/convex/_generated/api";
-
-function ProductList() {
-  const products = useQuery(api.products.getProducts, { limit: 20 });
-  
-  if (products === undefined) return <Loading />;
-  return <ProductGrid products={products} />;
-}
-```
-
-### Mutation Usage Pattern
-
-```typescript
-import { useMutation } from "convex/react";
-
-function AddToCartButton({ product }) {
-  const createOrder = useMutation(api.orders.createOrder);
-  
-  const handleClick = async () => {
-    await createOrder({ items: [...], customerId: "..." });
-  };
-}
-```
-
----
-
-## Routing Structure
-
-### App Router Structure
+## 🌐 Routing (Next.js App Router)
 
 ```
 app/
-├── layout.tsx          # Root layout (metadata, fonts, providers)
-├── page.tsx            # / - Home/Landing
+├── page.tsx                 # / (Home)
+├── layout.tsx               # Root layout
+├── globals.css              # Estilos globales
+│
 ├── catalogo/
-│   └── page.tsx        # /catalogo - Product catalog
+│   └── page.tsx             # /catalogo (Catálogo)
+│
 ├── producto/
 │   └── [sku]/
-│       └── page.tsx    # /producto/:sku - Product detail
+│       └── page.tsx         # /producto/GAS001 (Producto dinámico)
+│
 ├── carrito/
-│   └── page.tsx        # /carrito - Shopping cart
+│   └── page.tsx             # /carrito (Carrito)
+│
 ├── buscar/
-│   └── page.tsx        # /buscar?q= - Search results
+│   └── page.tsx             # /buscar (Búsqueda)
+│
 └── pedidos/
-    └── page.tsx        # /pedidos - Order history
+    └── page.tsx             # /pedidos (Historial)
 ```
 
-### Route Types
+### Estrategia de Renderizado
 
-| Route | Type | Description |
-|-------|------|-------------|
-| `/` | Static | Pre-rendered at build time |
-| `/catalogo` | Dynamic SSR | Server-side rendered with data |
-| `/producto/[sku]` | Dynamic | Generated per product SKU |
-| `/carrito` | Client-only | Uses localStorage, no SSR |
+| Ruta | Estrategia | Razón |
+|------|------------|-------|
+| `/` | SSG | Home estática, datos de Convex en cliente |
+| `/catalogo` | SSG + Client Fetch | Listado con filtros dinámicos |
+| `/producto/[sku]` | SSG (550 páginas) | Pre-renderizado de todos los productos |
+| `/carrito` | CSR | Datos de localStorage |
+| `/buscar` | CSR | Búsqueda en tiempo real |
 
-### Navigation Pattern
+---
 
-```typescript
-// Using Next.js Link for client-side navigation
-import Link from "next/link";
+## 🔒 Seguridad en Arquitectura
 
-<Link href={`/producto/${product.sku}`}>
-  <ProductCard product={product} />
-</Link>
+### Capas de Seguridad
+
+```
+┌─────────────────────────────────────┐
+│  1. Edge (Vercel)                   │
+│     • DDoS protection               │
+│     • HTTPS only                    │
+│     • WAF (Web Application Firewall)│
+├─────────────────────────────────────┤
+│  2. Application (Next.js)           │
+│     • CSP Headers                   │
+│     • XSS Protection                │
+│     • Input sanitization            │
+├─────────────────────────────────────┤
+│  3. API (Convex)                    │
+│     • Type-safe queries             │
+│     • Schema validation (Zod)       │
+│     • No SQL injection              │
+├─────────────────────────────────────┤
+│  4. Data (Convex DB)                │
+│     • Encrypted at rest             │
+│     • Access control (futuro)       │
+│     • Audit logs                    │
+└─────────────────────────────────────┘
 ```
 
 ---
 
-## Authentication Flow
+## ⚡ Performance Optimizations
 
-### Current State
+### Implementadas
 
-Authentication is currently **not implemented**. The application uses:
-- Anonymous cart (localStorage-based)
-- WhatsApp for order identity (phone number)
-- No user accounts required
+| Optimización | Implementación | Impacto |
+|--------------|----------------|---------|
+| SSG | `generateStaticParams` | ⚡ Tiempo de carga |
+| Image Optimization | `next/image` equivalent | 📦 Tamaño |
+| Code Splitting | Next.js automático | 📦 Bundle |
+| Lazy Loading | Dynamic imports | ⚡ Initial load |
+| CDN Caching | Vercel Edge | ⚡ Global speed |
+| Real-time | Convex WebSocket | 🔄 Live updates |
 
-### Planned Authentication (Future)
+### Por implementar
+
+| Optimización | Prioridad |
+|--------------|-----------|
+| Service Worker | Medium |
+| Prefetching | Low |
+| Edge Functions | Medium |
+| Image CDN (Cloudinary) | High |
+
+---
+
+## 📈 Escalabilidad
+
+### Horizontal (Más usuarios)
 
 ```
-Login Options:
-├── Magic Link (Email)
-├── Google OAuth
-└── Phone (WhatsApp verification)
-
-User Flow:
-1. Browse anonymously
-2. Cart persists in localStorage
-3. Optional: Sign in to save cart
-4. Checkout → WhatsApp (with user context)
+Vercel: Auto-scaling ✓
+Convex: Auto-scaling ✓
+No action needed
 ```
 
-### Authentication Architecture
+### Vertical (Más features)
 
-```typescript
-// Future: Convex Auth integration
-// convex/auth.ts
-import { convexAuth } from "@convex-dev/auth/server";
-
-export const { auth, signIn, signOut, store } = convexAuth({
-  providers: [Google, Email],
-});
+```
+Fase 1: Admin panel (CRUD productos)
+Fase 2: Auth de usuarios (Convex Auth)
+Fase 3: Pasarela de pagos (Wompi/MercadoPago)
+Fase 4: Analytics avanzado
 ```
 
 ---
 
-## Performance Optimizations
+## 🔗 Integraciones Externas
 
-### Implemented
+### Activas
 
-| Optimization | Implementation |
-|--------------|----------------|
-| Image Optimization | Next.js Image component |
-| Code Splitting | App Router automatic splitting |
-| Data Fetching | Convex reactive queries |
-| Caching | Convex automatic caching |
-| Font Loading | `next/font` with Geist |
+| Servicio | Uso | Status |
+|----------|-----|--------|
+| WhatsApp API | Checkout | ✅ Activo |
+| Unsplash/Pexels | Imágenes de ejemplo | ✅ Activo |
 
-### Loading States
+### Planificadas
 
-```typescript
-// Pattern for loading UI
-if (products === undefined) {
-  return (
-    <div className="flex justify-center">
-      <Spinner />
-    </div>
-  );
-}
-```
+| Servicio | Uso | Prioridad |
+|----------|-----|-----------|
+| Cloudinary | Upload de imágenes | High |
+| Google OAuth | Login de clientes | Medium |
+| Wompi/MercadoPago | Pagos online | High |
+| Google Analytics | Tracking | Medium |
 
 ---
 
-## Error Handling
+## 📝 Decisiones de Arquitectura
 
-### Error Boundaries
+### Por qué Next.js + App Router
 
-Currently using default Next.js error handling. Future implementation:
+| Alternativa | Por qué no elegimos | Por qué Next.js |
+|-------------|--------------------|-----------------|
+| Create React App | No SSR, SEO difícil | SSG/SSR nativo |
+| Gatsby | Build lento con 550 páginas | ISR, más rápido |
+| Remix | Menos maduro | Ecosistema más grande |
+| Astro | Menos interactivo | React nativo |
 
-```typescript
-// app/error.tsx
-"use client";
+### Por qué Convex
 
-export default function Error({ error, reset }) {
-  return (
-    <div className="error-page">
-      <h2>Algo salió mal</h2>
-      <button onClick={reset}>Intentar de nuevo</button>
-    </div>
-  );
-}
-```
+| Alternativa | Por qué no elegimos | Por qué Convex |
+|-------------|--------------------|----------------|
+| Supabase | PostgreSQL complejo | Serverless simple |
+| Firebase | Vendor lock-in Google | Mejor DX |
+| PlanetScale | MySQL, más config | Zero config |
+| AWS Lambda | Mucha config | Todo en uno |
 
-### Convex Error Handling
+### Por qué Vercel
 
-```typescript
-// Pattern in components
-try {
-  await createOrder({ ...args });
-} catch (error) {
-  toast.error("Error al crear el pedido");
-}
-```
+| Alternativa | Por qué no elegimos | Por qué Vercel |
+|-------------|--------------------|----------------|
+| Netlify | Menos optimizado Next.js | Creadores de Next.js |
+| AWS Amplify | Complejo | Zero config |
+| Cloudflare Pages | Menos features | Mejor integración |
+
+---
+
+## 📚 Recursos
+
+- [Next.js Architecture](https://nextjs.org/docs/architecture)
+- [Convex Docs](https://docs.convex.dev)
+- [Vercel Edge Network](https://vercel.com/docs/edge-network)
+
+---
+
+<p align="center">
+  <strong>Arquitectura diseñada para escalar 🚀</strong>
+</p>

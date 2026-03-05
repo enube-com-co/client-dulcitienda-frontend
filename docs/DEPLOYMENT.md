@@ -1,284 +1,135 @@
-# Deployment Documentation
+# 🚀 Deployment Guide - Dulcitienda
 
-Complete guide for deploying Dulcitienda to production.
-
----
-
-## Table of Contents
-
-1. [Overview](#overview)
-2. [Vercel Deployment](#vercel-deployment)
-3. [Convex Deployment](#convex-deployment)
-4. [Environment Setup](#environment-setup)
-5. [Build Process](#build-process)
-6. [Troubleshooting](#troubleshooting)
+Guía completa para deployar Dulcitienda en producción.
 
 ---
 
-## Overview
+## 📋 Requisitos
 
-Dulcitienda is deployed across two platforms:
+- [ ] Cuenta en GitHub
+- [ ] Cuenta en Vercel
+- [ ] Cuenta en Convex
+- [ ] Git instalado
+- [ ] Node.js 20+
 
-| Platform | Purpose | URL |
-|----------|---------|-----|
-| **Vercel** | Frontend hosting | `https://dulcitienda.com.co` |
-| **Convex** | Backend & database | `https://unique-id.convex.cloud` |
+---
 
-### Deployment Architecture
+## 🏗️ Arquitectura de Deployments
 
 ```
-User Request
-     │
-     ▼
-┌─────────────┐
-│   Vercel    │  (Next.js App)
-│   Edge      │  - Static files
-│   Network   │  - Server components
-└──────┬──────┘  - API routes
-       │
-       │ Convex Client
-       ▼
-┌─────────────┐
-│   Convex    │  (Backend)
-│   Cloud     │  - Database
-└─────────────┘  - Functions
+┌──────────────────────────────────────────────────────────────┐
+│                      GITHUB REPOS                             │
+│  ┌──────────────────┐        ┌──────────────────┐           │
+│  │   Frontend       │        │   Backend        │           │
+│  │   (Next.js)      │        │   (Convex)       │           │
+│  └────────┬─────────┘        └────────┬─────────┘           │
+└───────────┼──────────────────────────┼───────────────────────┘
+            │                          │
+            ▼                          ▼
+┌──────────────────────┐    ┌──────────────────────┐
+│       VERCEL         │    │       CONVEX         │
+│  ┌────────────────┐  │    │  ┌────────────────┐  │
+│  │  Production    │  │    │  │  Production    │  │
+│  │  dulcitienda   │  │    │  │  ceaseless-   │  │
+│  │  .vercel.app   │  │    │  │  ibis-857     │  │
+│  └────────────────┘  │    │  └────────────────┘  │
+└──────────────────────┘    └──────────────────────┘
 ```
 
 ---
 
-## Vercel Deployment
+## 🚀 Deployment Frontend (Vercel)
 
-### Initial Setup
-
-1. **Push to GitHub**
-   ```bash
-   git add .
-   git commit -m "Initial commit"
-   git push origin main
-   ```
-
-2. **Connect to Vercel**
-   - Go to [vercel.com](https://vercel.com)
-   - Click "Add New Project"
-   - Import from GitHub
-   - Select `dulcitienda-app` repository
-
-3. **Configure Project**
-   - Framework Preset: Next.js
-   - Build Command: `npm run build`
-   - Output Directory: `.next`
-   - Install Command: `npm install`
-
-4. **Environment Variables**
-   Add in Vercel Dashboard → Settings → Environment Variables:
-   ```
-   NEXT_PUBLIC_CONVEX_URL=https://your-deployment.convex.cloud
-   ```
-
-5. **Deploy**
-   - Click "Deploy"
-   - Vercel builds and deploys automatically
-
-### Production Domain
-
-To use custom domain (`dulcitienda.com.co`):
-
-1. **In Vercel Dashboard**:
-   - Go to Project → Settings → Domains
-   - Add `dulcitienda.com.co`
-
-2. **DNS Configuration** (at domain registrar):
-   ```
-   Type: A
-   Name: @
-   Value: 76.76.21.21
-   
-   Type: CNAME
-   Name: www
-   Value: cname.vercel-dns.com
-   ```
-
-3. **SSL Certificate**
-   - Vercel automatically provisions SSL
-   - May take a few minutes
-
-### Branch Deployments
-
-Every push creates a deployment:
-
-| Branch | URL Pattern |
-|--------|-------------|
-| `main` | `dulcitienda.com.co` |
-| `develop` | `dulcitienda-git-develop.vercel.app` |
-| PR #123 | `dulcitienda-git-feat-123.vercel.app` |
-
----
-
-## Convex Deployment
-
-### Initial Deployment
-
-1. **Login to Convex**
-   ```bash
-   npx convex login
-   ```
-
-2. **Initialize Project**
-   ```bash
-   npx convex init
-   # Creates convex.json with project details
-   ```
-
-3. **Deploy**
-   ```bash
-   npx convex deploy
-   ```
-   
-   Or with deploy key (CI/CD):
-   ```bash
-   npx convex deploy --code-based --cmd 'npm run build'
-   ```
-
-### Deployment Options
+### 1. Configurar GitHub
 
 ```bash
-# Deploy to production
+# El repo ya está en GitHub
+# https://github.com/enube-com-co/client-dulcitienda-frontend
+```
+
+### 2. Configurar Vercel
+
+```bash
+# Instalar CLI
+npm i -g vercel
+
+# Login
+vercel login
+
+# Link proyecto (primera vez)
+vercel link
+
+# Deploy a preview
+vercel
+
+# Deploy a producción
+vercel --prod
+```
+
+### 3. Variables de Entorno en Vercel
+
+Ir a: [vercel.com/dashboard](https://vercel.com/dashboard) → Project → Settings → Environment Variables
+
+| Variable | Valor | Environment |
+|----------|-------|-------------|
+| `NEXT_PUBLIC_CONVEX_URL` | `https://ceaseless-ibis-857.convex.cloud` | Production, Preview |
+
+### 4. Dominio Personalizado (Opcional)
+
+```bash
+# Configurar dominio en Vercel Dashboard
+# Settings → Domains → Add
+
+# Luego configurar DNS:
+Type: CNAME
+Name: www
+Value: cname.vercel-dns.com
+```
+
+---
+
+## 🗄️ Deployment Backend (Convex)
+
+### 1. Instalar Convex CLI
+
+```bash
+npm install -g convex
+```
+
+### 2. Login
+
+```bash
+npx convex login
+```
+
+### 3. Deploy
+
+```bash
+# Desarrollo (local)
+npx convex dev
+
+# Producción
 npx convex deploy
-
-# Deploy with specific key
-CONVEX_DEPLOY_KEY=xxx npx convex deploy
-
-# Preview deployment (for PRs)
-npx convex deploy --preview
 ```
 
-### Production Deploy Key
+### 4. Dashboard
 
-For CI/CD environments:
-
-1. **Generate Key** (in Convex Dashboard)
-   - Go to Settings → Deploy Keys
-   - Create Production Deploy Key
-
-2. **Add to CI/CD**
-   ```bash
-   # GitHub Actions example
-   CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
-   ```
-
-### Database Seeding
-
-```bash
-# Seed initial data
-npx convex run seed:seedProducts
-
-# Mass seed (development)
-npx convex run seedMassive:seedAllProducts
-```
+Acceder a: [dashboard.convex.dev](https://dashboard.convex.dev)
 
 ---
 
-## Environment Setup
-
-### Required Variables
-
-| Variable | Environment | Description |
-|----------|-------------|-------------|
-| `NEXT_PUBLIC_CONVEX_URL` | All | Convex deployment URL |
-| `CONVEX_DEPLOY_KEY` | Production | Deploy key for CI/CD |
-
-### Environment Files
-
-```
-.env.local          # Local development (gitignored)
-.env.production     # Production (optional)
-.env.example        # Template for new developers
-```
-
-### Variable Values by Environment
-
-**Development**:
-```env
-NEXT_PUBLIC_CONVEX_URL=http://localhost:3210
-```
-
-**Production**:
-```env
-NEXT_PUBLIC_CONVEX_URL=https://cheerful-parakeet-123.convex.cloud
-CONVEX_DEPLOY_KEY=your_deploy_key_here
-```
-
----
-
-## Build Process
-
-### Local Build
-
-```bash
-# Install dependencies
-npm install
-
-# Build for production
-npm run build
-
-# Output in .next/ directory
-```
-
-### Build Steps
-
-1. **TypeScript Compilation**
-   ```
-   Checking validity of types...
-   ```
-
-2. **Convex Code Generation**
-   ```
-   Generating Convex types...
-   ```
-
-3. **Next.js Build**
-   ```
-   Creating an optimized production build...
-   ✓ Compiled successfully
-   ✓ Linting and checking validity of types
-   ✓ Collecting page data
-   ✓ Generating static pages
-   ✓ Finalizing page optimization
-   ```
-
-4. **Output**
-   ```
-   .next/
-   ├── static/           # Static assets
-   ├── server/           # Server components
-   ├── chunks/           # JavaScript chunks
-   └── build-manifest.json
-   ```
-
-### Convex Build
-
-```bash
-# During build, Convex:
-1. Validates schema.ts
-2. Compiles functions
-3. Deploys to cloud
-4. Updates generated types
-```
-
----
-
-## Continuous Deployment
+## 🔄 CI/CD (Futuro)
 
 ### GitHub Actions Workflow
 
-**File**: `.github/workflows/deploy.yml`
+Crear `.github/workflows/deploy.yml`:
 
 ```yaml
 name: Deploy
 
 on:
   push:
-    branches: [main]
+    branches: [ main ]
 
 jobs:
   deploy:
@@ -289,171 +140,139 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v3
         with:
-          node-version: 18
-          
+          node-version: '20'
+      
       - name: Install dependencies
         run: npm ci
-        
-      - name: Deploy Convex
-        env:
-          CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
-        run: npx convex deploy
-        
-      - name: Build Next.js
+      
+      - name: Build
         run: npm run build
-        
+        env:
+          NEXT_PUBLIC_CONVEX_URL: ${{ secrets.NEXT_PUBLIC_CONVEX_URL }}
+      
       - name: Deploy to Vercel
         uses: vercel/action-deploy@v1
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
 ```
-
-### Deployment Checklist
-
-Before deploying:
-
-- [ ] All tests passing
-- [ ] Environment variables set
-- [ ] Convex schema valid
-- [ ] No console errors
-- [ ] Images optimized
-- [ ] SEO meta tags correct
-
-After deploying:
-
-- [ ] Site loads correctly
-- [ ] Convex queries working
-- [ ] Cart functionality works
-- [ ] WhatsApp link works
-- [ ] Mobile responsive
-- [ ] Performance acceptable
 
 ---
 
-## Troubleshooting
+## 🧪 Pre-deployment Checklist
 
-### Common Issues
-
-#### Build Failures
-
-**Error**: `Cannot find module 'convex/react'`
-```bash
-# Solution: Install dependencies
-npm install
-```
-
-**Error**: `NEXT_PUBLIC_CONVEX_URL is not set`
-```bash
-# Solution: Set environment variable
-export NEXT_PUBLIC_CONVEX_URL=https://your-deployment.convex.cloud
-```
-
-**Error**: `Type error in convex/schema.ts`
-```bash
-# Solution: Check schema syntax
-npx convex dev  # Run locally to see errors
-```
-
-#### Runtime Issues
-
-**Error**: `Failed to fetch` (Convex)
-- Check `NEXT_PUBLIC_CONVEX_URL` is correct
-- Verify Convex deployment is active
-- Check network connectivity
-
-**Error**: Cart not persisting
-- Check localStorage is enabled
-- Verify no quota exceeded
-- Check for JavaScript errors
-
-**Error**: Images not loading
-- Check image URLs are valid
-- Verify CORS headers
-- Check network tab for 404s
-
-### Convex-Specific Issues
-
-**Error**: `Query rate limit exceeded`
-```typescript
-// Solution: Add pagination
-const products = useQuery(api.products.getProducts, { 
-  limit: 50  // Reduce from 500
-});
-```
-
-**Error**: `Schema validation failed`
-```bash
-# Solution: Reset and redeploy
-npx convex dev --reset
-npx convex deploy
-```
-
-**Error**: `Function timeout`
-```typescript
-// Solution: Optimize query
-// Use indexes, reduce data processed
-```
-
-### Performance Issues
-
-**Slow initial load**:
-- Enable Next.js image optimization
-- Use `next/font` for fonts
-- Implement code splitting
-
-**Slow queries**:
-- Add Convex indexes
-- Reduce query complexity
-- Use pagination
-
-**Large bundle size**:
-- Analyze with `@next/bundle-analyzer`
-- Tree-shake unused imports
-- Dynamic import heavy components
-
-### Debug Commands
+### Antes de cada deploy a producción:
 
 ```bash
-# Check Convex status
-npx convex status
+# 1. Tests (cuando estén listos)
+npm run test
 
-# View logs
-npx convex logs
+# 2. Build local
+npm run build
 
-# Local development with hot reload
-npx convex dev
+# 3. Verificar no hay errores de TypeScript
+npx tsc --noEmit
 
-# Test build locally
-npm run build && npm start
+# 4. Verificar linting
+npm run lint
+
+# 5. Probar funcionalidad crítica
+# - Búsqueda de productos
+# - Agregar al carrito
+# - Checkout de WhatsApp
 ```
-
-### Getting Help
-
-| Resource | Link |
-|----------|------|
-| Convex Docs | [docs.convex.dev](https://docs.convex.dev) |
-| Next.js Docs | [nextjs.org/docs](https://nextjs.org/docs) |
-| Vercel Docs | [vercel.com/docs](https://vercel.com/docs) |
-| Tailwind Docs | [tailwindcss.com/docs](https://tailwindcss.com/docs) |
 
 ---
 
-## Rollback Procedure
+## 🚨 Rollback
 
-If deployment fails:
+### Si algo sale mal:
 
-1. **Vercel Rollback**:
-   - Go to Vercel Dashboard
-   - Find previous deployment
-   - Click "Promote to Production"
+```bash
+# Ver commits anteriores
+git log --oneline
 
-2. **Convex Rollback**:
-   ```bash
-   # Deploy previous version
-   git checkout <previous-commit>
-   npx convex deploy
-   ```
+# Revertir a commit anterior
+git revert HEAD
 
-3. **Database Rollback**:
-   - Convex keeps history
-   - Contact Convex support for data restore
+# O resetear a commit específico
+git reset --hard <commit-hash>
+git push --force
+
+# Vercel automáticamente redeploya
+```
+
+---
+
+## 📊 Monitoreo Post-Deploy
+
+### Vercel Analytics
+
+- [vercel.com/analytics](https://vercel.com/analytics)
+- Web Vitals
+- Traffic
+- Errors
+
+### Convex Dashboard
+
+- [dashboard.convex.dev](https://dashboard.convex.dev)
+- Function calls
+- Database usage
+- Errors
+
+### Manual Checks
+
+```bash
+# Verificar sitio
+curl -I https://dulcitienda-app.vercel.app
+
+# Verificar API
+curl https://ceaseless-ibis-857.convex.cloud/api/version
+```
+
+---
+
+## 🔐 Secrets Management
+
+### No commitear nunca:
+
+```bash
+# .env.local (en .gitignore)
+CONVEX_DEPLOY_KEY=xxx
+VERCEL_TOKEN=xxx
+```
+
+### Almacenar en:
+
+1. **Vercel**: Dashboard → Project → Settings → Environment Variables
+2. **GitHub Secrets**: Settings → Secrets and variables → Actions
+3. **Local**: `.env.local` (no commitear)
+
+---
+
+## 📞 Contacto para Soporte
+
+| Plataforma | Soporte |
+|------------|---------|
+| Vercel | [vercel.com/support](https://vercel.com/support) |
+| Convex | [docs.convex.dev](https://docs.convex.dev) |
+| GitHub | [support.github.com](https://support.github.com) |
+
+---
+
+## ✅ URLs Importantes
+
+| Recurso | URL |
+|---------|-----|
+| **Producción** | https://dulcitienda-app.vercel.app |
+| **Backend** | https://ceaseless-ibis-857.convex.cloud |
+| **GitHub Repo** | https://github.com/enube-com-co/client-dulcitienda-frontend |
+| **Convex Dashboard** | https://dashboard.convex.dev/dulcitienda |
+| **Vercel Dashboard** | https://vercel.com/dashboard |
+
+---
+
+<p align="center">
+  <strong>Happy Deploying! 🚀</strong>
+</p>
