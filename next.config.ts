@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Security Headers - Hardened Configuration
+  // Security Headers - Balanced Configuration
   async headers() {
     return [
       {
@@ -11,9 +11,9 @@ const nextConfig: NextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' https://ceaseless-ibis-857.convex.cloud",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://ceaseless-ibis-857.convex.cloud",
               "style-src 'self' 'unsafe-inline'",
-              "img-src 'self' https://images.unsplash.com https://images.pexels.com data:",
+              "img-src 'self' https://images.unsplash.com https://images.pexels.com data: blob:",
               "font-src 'self'",
               "connect-src 'self' https://ceaseless-ibis-857.convex.cloud wss://ceaseless-ibis-857.convex.cloud",
               "frame-ancestors 'none'",
