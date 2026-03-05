@@ -309,7 +309,7 @@ export default function Catalogo() {
             <div className={`grid ${viewMode === "grid" ? 'grid-cols-2 md:grid-cols-3 lg:grid-cols-3' : 'grid-cols-1'} gap-6`}>
               {products?.page?.map((product) => {
                 const categorySlug = getCategorySlug(product.categoryId);
-                const imageData = getProductImageUrl(product.name, categorySlug);
+                const imageData = getProductImageUrl(product.name, product.sku);
                 const isAdded = addedProduct === product._id;
                 
                 return (
