@@ -1,7 +1,8 @@
+import { NextRequest, NextResponse } from "next/server";
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 
-const handler = NextAuth({
+const authOptions = {
   providers: [
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -10,7 +11,7 @@ const handler = NextAuth({
   ],
   
   callbacks: {
-    async signIn({ user, account }) {
+    async signIn({ user, account }: any) {
       if (account?.provider === "google" && user.email) {
         const email = user.email.toLowerCase();
         let role = "customer";
@@ -21,7 +22,6 @@ const handler = NextAuth({
           role = "power_user";
         }
         
-        // @ts-ignore
         user.role = role;
         
         return true;
@@ -29,21 +29,17 @@ const handler = NextAuth({
       return true;
     },
     
-    async jwt({ token, user }) {
+    async jwt({ token, user }: any) {
       if (user) {
-        // @ts-ignore
         token.userId = user.id;
-        // @ts-ignore
         token.role = user.role || "customer";
       }
       return token;
     },
     
-    async session({ session, token }) {
+    async session({ session, token }: any) {
       if (token) {
-        // @ts-ignore
         session.user.id = token.userId;
-        // @ts-ignore
         session.user.role = token.role;
       }
       return session;
@@ -56,6 +52,16 @@ const handler = NextAuth({
   },
   
   secret: process.env.NEXTAUTH_SECRET,
-});
+};
 
-export { handler as GET, handler as POST };
+const nextAuthHandler = NextAuth(authOptions);
+
+export async function GET(req: NextRequest, context: any) {
+  // @ts-ignore
+  return nextAuthHandler(req, context);
+}
+
+export async function POST(req: NextRequest, context: any) {
+  // @ts-ignore
+  return nextAuthHandler(req, context);
+}
