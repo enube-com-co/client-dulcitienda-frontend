@@ -28,6 +28,8 @@ export default function Home() {
     localStorage.removeItem("dulcitienda_user");
     setUser(null);
   };
+
+  const showLoading = !mounted || products === undefined || categories === undefined;
   
   if (showLoading) {
     return (
