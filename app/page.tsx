@@ -4,11 +4,13 @@ import { useEffect, useState } from "react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import Link from "next/link";
-import { ShoppingCart, Menu, X, Phone, MapPin, Mail, ChevronRight, Star, Truck, Shield, Clock } from "lucide-react";
+import { useSession, signOut } from "next-auth/react";
+import { ShoppingCart, Menu, X, Phone, MapPin, Mail, ChevronRight, Star, Truck, Shield, Clock, User } from "lucide-react";
 import SearchDropdown from "@/components/SearchDropdown";
 import { SLOGAN } from "@/lib/brand";
 
 export default function Home() {
+  const { data: session } = useSession();
   const [mounted, setMounted] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const products = useQuery(api.products.getFeaturedProducts, { limit: 8 });
@@ -87,6 +89,25 @@ export default function Home() {
                 <ShoppingCart size={24} />
                 <span className="bg-gradient-to-r from-pink-500 to-yellow-400 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center cart-count">0</span>
               </Link>
+              
+              {/* Login / User Button */}
+              {session ? (
+                <Link href="/perfil" className="hidden md:flex items-center gap-2 text-gray-700 hover:text-pink-600 transition-colors">
+                  {session.user?.image ? (
+                    <img src={session.user.image} alt="Profile" className="w-8 h-8 rounded-full" />
+                  ) : (
+                    <div className="w-8 h-8 bg-gradient-to-br from-pink-500 to-yellow-400 rounded-full flex items-center justify-center">
+                      <User size={16} className="text-white" />
+                    </div>
+                  )}
+                </Link>
+              ) : (
+                <Link href="/login" className="hidden md:flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-pink-500 to-yellow-400 text-white rounded-full font-medium hover:shadow-lg transition-all">
+                  <User size={18} />
+                  Entrar
+                </Link>
+              )}
+              
               <button 
                 className="md:hidden p-2"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
