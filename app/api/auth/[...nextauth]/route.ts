@@ -1,7 +1,7 @@
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 
-const handler = NextAuth({
+const authOptions = {
   providers: [
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -10,9 +10,8 @@ const handler = NextAuth({
   ],
   
   callbacks: {
-    async signIn({ user, account }) {
+    async signIn({ user, account }: any) {
       if (account?.provider === "google" && user.email) {
-        // Assign role based on email
         const email = user.email.toLowerCase();
         let role = "customer";
         
@@ -22,10 +21,8 @@ const handler = NextAuth({
           role = "power_user";
         }
         
-        // Store role in user object for JWT
-        (user as any).role = role;
+        user.role = role;
         
-        // Create/update user in Convex (best effort)
         try {
           await fetch(
             `${process.env.NEXT_PUBLIC_CONVEX_URL}/api/mutation`,
@@ -44,7 +41,7 @@ const handler = NextAuth({
             }
           );
         } catch (error) {
-          console.error("Failed to sync user to Convex:", error);
+          console.error("Failed to sync user:", error);
         }
         
         return true;
@@ -52,15 +49,15 @@ const handler = NextAuth({
       return true;
     },
     
-    async jwt({ token, user }) {
+    async jwt({ token, user }: any) {
       if (user) {
         token.userId = user.id;
-        token.role = (user as any).role || "customer";
+        token.role = user.role || "customer";
       }
       return token;
     },
     
-    async session({ session, token }) {
+    async session({ session, token }: any) {
       if (token) {
         (session.user as any).id = token.userId;
         (session.user as any).role = token.role;
@@ -74,6 +71,9 @@ const handler = NextAuth({
   },
   
   secret: process.env.NEXTAUTH_SECRET,
-});
+};
+
+// @ts-ignore - NextAuth v5 types issue
+const handler = NextAuth(authOptions);
 
 export { handler as GET, handler as POST };
