@@ -111,11 +111,6 @@ export const createOrUpdateFromOAuth = mutation({
       lastLoginAt: Date.now(),
       createdAt: Date.now(),
     });
-      customerTier: "bronze",
-      isActive: true,
-      lastLoginAt: Date.now(),
-      createdAt: Date.now(),
-    });
     
     return userId;
   },
