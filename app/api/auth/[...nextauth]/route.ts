@@ -1,16 +1,16 @@
 import NextAuth from "next-auth";
-import Google from "next-auth/providers/google";
+import GoogleProvider from "next-auth/providers/google";
 
-const authOptions = {
+const handler = NextAuth({
   providers: [
-    Google({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID || "",
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
     }),
   ],
   
   callbacks: {
-    async signIn({ user, account }: any) {
+    async signIn({ user, account }) {
       if (account?.provider === "google" && user.email) {
         const email = user.email.toLowerCase();
         let role = "customer";
@@ -21,7 +21,7 @@ const authOptions = {
           role = "power_user";
         }
         
-        user.role = role;
+        (user as any).role = role;
         
         try {
           await fetch(
@@ -49,15 +49,15 @@ const authOptions = {
       return true;
     },
     
-    async jwt({ token, user }: any) {
+    async jwt({ token, user }) {
       if (user) {
         token.userId = user.id;
-        token.role = user.role || "customer";
+        token.role = (user as any).role || "customer";
       }
       return token;
     },
     
-    async session({ session, token }: any) {
+    async session({ session, token }) {
       if (token) {
         (session.user as any).id = token.userId;
         (session.user as any).role = token.role;
@@ -71,9 +71,6 @@ const authOptions = {
   },
   
   secret: process.env.NEXTAUTH_SECRET,
-};
-
-// @ts-ignore - NextAuth v5 types issue
-const handler = NextAuth(authOptions);
+});
 
 export { handler as GET, handler as POST };
