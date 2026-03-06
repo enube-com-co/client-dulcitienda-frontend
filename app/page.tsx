@@ -4,13 +4,13 @@ import { useEffect, useState } from "react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import Link from "next/link";
-import { useSession, signOut } from "next-auth/react";
+import { useSession, signOut } from "@convex-dev/auth/react";
 import { ShoppingCart, Menu, X, Phone, MapPin, Mail, ChevronRight, Star, Truck, Shield, Clock, User } from "lucide-react";
 import SearchDropdown from "@/components/SearchDropdown";
 import { SLOGAN } from "@/lib/brand";
 
 export default function Home() {
-  const { data: session, status } = useSession({ required: false });
+  const session = useSession();
   const [mounted, setMounted] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const products = useQuery(api.products.getFeaturedProducts, { limit: 8 });
