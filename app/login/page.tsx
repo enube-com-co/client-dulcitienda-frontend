@@ -51,7 +51,7 @@ export default function LoginPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
               </div>
-              <p className="text-gray-700">¡Bienvenido! Redirigiendo...{"</p>
+              <p className="text-gray-700">¡Bienvenido! Redirigiendo...</p>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-6">
