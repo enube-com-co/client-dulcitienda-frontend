@@ -10,7 +10,7 @@ import SearchDropdown from "@/components/SearchDropdown";
 import { SLOGAN } from "@/lib/brand";
 
 export default function Home() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession({ required: false });
   const [mounted, setMounted] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const products = useQuery(api.products.getFeaturedProducts, { limit: 8 });
@@ -20,7 +20,10 @@ export default function Home() {
     setMounted(true);
   }, []);
 
-  if (!mounted || products === undefined || categories === undefined) {
+  // Don't block on auth - show content even if session is loading
+  const showLoading = !mounted || products === undefined || categories === undefined;
+  
+  if (showLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
