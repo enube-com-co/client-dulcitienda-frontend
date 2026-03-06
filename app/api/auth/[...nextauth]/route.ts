@@ -1,11 +1,11 @@
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 
-const handler = NextAuth({
+export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
     Google({
-      clientId: process.env.GOOGLE_CLIENT_ID || "",
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     }),
   ],
   
@@ -21,28 +21,8 @@ const handler = NextAuth({
           role = "power_user";
         }
         
-        (user as any).role = role;
-        
-        try {
-          await fetch(
-            `${process.env.NEXT_PUBLIC_CONVEX_URL}/api/mutation`,
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                path: "users:createOrUpdateFromOAuth",
-                args: {
-                  email: user.email,
-                  name: user.name,
-                  googleId: user.id,
-                  photo: user.image,
-                },
-              }),
-            }
-          );
-        } catch (error) {
-          console.error("Failed to sync user:", error);
-        }
+        // @ts-ignore
+        user.role = role;
         
         return true;
       }
@@ -51,16 +31,20 @@ const handler = NextAuth({
     
     async jwt({ token, user }) {
       if (user) {
+        // @ts-ignore
         token.userId = user.id;
-        token.role = (user as any).role || "customer";
+        // @ts-ignore
+        token.role = user.role || "customer";
       }
       return token;
     },
     
     async session({ session, token }) {
       if (token) {
-        (session.user as any).id = token.userId;
-        (session.user as any).role = token.role;
+        // @ts-ignore
+        session.user.id = token.userId;
+        // @ts-ignore
+        session.user.role = token.role;
       }
       return session;
     },
@@ -68,9 +52,10 @@ const handler = NextAuth({
   
   pages: {
     signIn: "/login",
+    error: "/login",
   },
   
   secret: process.env.NEXTAUTH_SECRET,
-}) as any;
+});
 
-export { handler as GET, handler as POST };
+export const { GET, POST } = handlers;
