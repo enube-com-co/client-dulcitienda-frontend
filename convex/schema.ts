@@ -112,19 +112,32 @@ export default defineSchema({
   users: defineTable({
     email: v.string(),
     name: v.string(),
+    googleId: v.optional(v.string()),  // Google OAuth ID
+    photo: v.optional(v.string()),       // Google profile photo
     phone: v.optional(v.string()),
-    role: v.union(v.literal("admin"), v.literal("customer"), v.literal("sales_rep")),
+    role: v.union(v.literal("admin"), v.literal("power_user"), v.literal("customer")),
     customerTier: v.optional(v.union(
       v.literal("bronze"), 
       v.literal("silver"), 
       v.literal("gold"), 
       v.literal("platinum")
     )),
+    shippingAddresses: v.optional(v.array(v.object({
+      id: v.string(),
+      name: v.string(),
+      street: v.string(),
+      city: v.string(),
+      state: v.string(),
+      zip: v.string(),
+      isDefault: v.boolean(),
+    }))),
     companyId: v.optional(v.id("companies")),
     isActive: v.boolean(),
+    lastLoginAt: v.optional(v.number()),
     createdAt: v.number(),
   })
     .index("by_email", ["email"])
+    .index("by_googleId", ["googleId"])
     .index("by_company", ["companyId"]),
 
   // Companies (B2B clients)
