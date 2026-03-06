@@ -1,6 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { 
@@ -17,17 +20,21 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
-// Admin emails
-const ADMIN_EMAILS = ["andres.monje@enube.com.co"];
-
 export default function AdminDashboard() {
-  const [user, setUser] = useState<{ email: string; name: string } | null>(null);
+  const router = useRouter();
+  const [localUser, setLocalUser] = useState<{ email: string; name: string } | null>(null);
   const [loading, setLoading] = useState(true);
+  
+  // Get user from Convex
+  const convexUser = useQuery(
+    api.users.getByEmail,
+    localUser?.email ? { email: localUser.email } : "skip"
+  );
 
   useEffect(() => {
     const savedUser = localStorage.getItem("dulcitienda_user");
     if (savedUser) {
-      setUser(JSON.parse(savedUser));
+      setLocalUser(JSON.parse(savedUser));
     }
     setLoading(false);
   }, []);
@@ -40,8 +47,10 @@ export default function AdminDashboard() {
     );
   }
 
-  // Check if user is admin
-  if (!user || !ADMIN_EMAILS.includes(user.email)) {
+  // Check if user is admin from Convex data
+  const isAdmin = convexUser?.role === "admin";
+  
+  if (!localUser || !isAdmin) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
         <Card className="w-full max-w-md p-8 text-center">
@@ -133,7 +142,7 @@ export default function AdminDashboard() {
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Panel de Administración</h1>
-            <p className="text-gray-500">Bienvenido, {user.name}</p>
+            <p className="text-gray-500">Bienvenido, {convexUser?.name || localUser?.name}</p>
           </div>
           <div className="flex gap-3">
             <Link href="/">

@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,6 +11,8 @@ import { Mail, ArrowRight, User } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
+  const createOrUpdateUser = useMutation(api.users.createOrUpdateFromLogin);
+  
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
@@ -18,14 +22,25 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
     
-    // Guardar en localStorage para uso local
-    localStorage.setItem("dulcitienda_user", JSON.stringify({ email, name }));
-    
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      // Create/update user in Convex
+      const userId = await createOrUpdateUser({ email, name });
+      
+      // Save to localStorage for UI state
+      localStorage.setItem("dulcitienda_user", JSON.stringify({ 
+        id: userId,
+        email: email.toLowerCase().trim(), 
+        name: name.trim() 
+      }));
+      
       setSubmitted(true);
       setTimeout(() => router.push("/"), 1000);
-    }, 500);
+    } catch (error) {
+      console.error("Login error:", error);
+      alert("Error al iniciar sesión. Intenta de nuevo.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

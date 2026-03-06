@@ -2,20 +2,28 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { User, Package, MapPin, LogOut, Crown, ChevronRight } from "lucide-react";
+import { User, Package, MapPin, LogOut, Crown, ChevronRight, Sparkles } from "lucide-react";
 import Link from "next/link";
 
 export default function ProfilePage() {
   const router = useRouter();
-  const [user, setUser] = useState<{ email: string; name: string } | null>(null);
+  const [localUser, setLocalUser] = useState<{ id: string; email: string; name: string } | null>(null);
   const [loading, setLoading] = useState(true);
+  
+  // Get user from Convex using email
+  const convexUser = useQuery(
+    api.users.getByEmail, 
+    localUser?.email ? { email: localUser.email } : "skip"
+  );
 
   useEffect(() => {
     const savedUser = localStorage.getItem("dulcitienda_user");
     if (savedUser) {
-      setUser(JSON.parse(savedUser));
+      setLocalUser(JSON.parse(savedUser));
     }
     setLoading(false);
   }, []);
@@ -33,7 +41,7 @@ export default function ProfilePage() {
     );
   }
 
-  if (!user) {
+  if (!localUser) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
         <Card className="w-full max-w-md p-8 text-center">
@@ -52,6 +60,32 @@ export default function ProfilePage() {
     );
   }
 
+  // Use Convex data if available, otherwise localStorage
+  const user = convexUser || {
+    name: localUser.name,
+    email: localUser.email,
+    role: "customer",
+    customerTier: "bronze",
+  };
+  
+  const getTierColor = (tier?: string) => {
+    switch (tier) {
+      case "platinum": return "text-purple-600";
+      case "gold": return "text-yellow-600";
+      case "silver": return "text-gray-500";
+      default: return "text-amber-700";
+    }
+  };
+  
+  const getTierName = (tier?: string) => {
+    switch (tier) {
+      case "platinum": return "Platino";
+      case "gold": return "Oro";
+      case "silver": return "Plata";
+      default: return "Bronce";
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-4xl mx-auto px-4">
@@ -65,9 +99,17 @@ export default function ProfilePage() {
               <h1 className="text-2xl font-bold">{user.name}</h1>
               <p className="text-white/80">{user.email}</p>
               <div className="flex items-center gap-2 mt-2">
-                <Crown size={16} className="text-yellow-200" />
-                <span className="text-sm">Cliente Bronce</span>
-              </div>
+                <Crown size={16} className={getTierColor(user.customerTier)} />
+                <span className={`text-sm font-medium ${getTierColor(user.customerTier)}`}>
+                  Cliente {getTierName(user.customerTier)}
+                </span>
+              </div>            
+              {user.role === "admin" && (
+                <div className="flex items-center gap-2 mt-1">
+                  <Sparkles size={14} className="text-yellow-200" />
+                  <span className="text-xs bg-white/20 px-2 py-1 rounded-full">Administrador</span>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -101,6 +143,23 @@ export default function ProfilePage() {
             </div>
             <ChevronRight className="text-gray-400" />
           </Card>
+          
+          {user.role === "admin" && (
+            <Link href="/admin">
+              <Card className="p-4 flex items-center justify-between hover:shadow-md transition-shadow border-pink-200">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                    <Sparkles className="text-purple-600" />
+                  </div>
+                  <div>
+                    <h2 className="font-semibold">Panel de Administración</h2>
+                    <p className="text-sm text-gray-500">Gestionar tienda y pedidos</p>
+                  </div>
+                </div>
+                <ChevronRight className="text-gray-400" />
+              </Card>
+            </Link>
+          )}
 
           <Button 
             variant="outline" 
