@@ -46,8 +46,8 @@ export default function ProfilePage() {
     );
   }
 
-  const role = user.role || "customer";
-  const customerTier = user.customerTier || "bronze";
+  const role = (user as any).role || "customer";
+  const customerTier = (user as any).customerTier || "bronze";
 
   const getTierColor = (tier: string) => {
     switch (tier) {
@@ -74,15 +74,15 @@ export default function ProfilePage() {
         <div className="bg-gradient-to-r from-pink-500 to-yellow-400 rounded-2xl p-8 text-white mb-8">
           <div className="flex items-center gap-4">
             <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center overflow-hidden">
-              {user.image ? (
-                <img src={user.image} alt={user.name || ""} className="w-full h-full object-cover" />
+              {(user as any).image ? (
+                <img src={(user as any).image} alt={(user as any).name || ""} className="w-full h-full object-cover" />
               ) : (
                 <User size={40} />
               )}
             </div>
             <div>
-              <h1 className="text-2xl font-bold">{user.name}</h1>
-              <p className="text-white/80">{user.email}</p>
+              <h1 className="text-2xl font-bold">{(user as any).name}</h1>
+              <p className="text-white/80">{(user as any).email}</p>
               <div className="flex items-center gap-2 mt-2">
                 <Crown size={16} className={getTierColor(customerTier)} />
                 <span className={`text-sm font-medium ${getTierColor(customerTier)}`}>
