@@ -96,10 +96,10 @@ export default function Home() {
               {/* Login / User Button */}
               {user ? (
                 <Link href="/perfil" className="hidden md:flex items-center gap-2 text-gray-700 hover:text-pink-600 transition-colors">
-                  {user.image ? (
+                  {(user as any).image ? (
                     <img 
-                      src={user.image} 
-                      alt={user.name || "User"} 
+                      src={(user as any).image} 
+                      alt={(user as any).name || "User"} 
                       className="w-8 h-8 rounded-full object-cover"
                     />
                   ) : (
@@ -107,7 +107,7 @@ export default function Home() {
                       <User size={16} className="text-white" />
                     </div>
                   )}
-                  <span className="text-sm font-medium">{user.name?.split(" ")[0] || "Perfil"}</span>
+                  <span className="text-sm font-medium">{(user as any).name?.split(" ")[0] || "Perfil"}</span>
                 </Link>
               ) : (
                 <Link href="/login" className="hidden md:flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-pink-500 to-yellow-400 text-white rounded-full font-medium hover:shadow-lg transition-all">
