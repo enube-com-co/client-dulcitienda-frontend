@@ -1,20 +1,33 @@
 "use client";
 
-import { useAuthActions } from "@convex-dev/auth/react";
+import { useAuthActions, Authenticated, Unauthenticated } from "@convex-dev/auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Chrome } from "lucide-react";
+import { useEffect } from "react";
+
+function RedirectToHome({ router }: { router: any }) {
+  useEffect(() => {
+    router.push("/");
+  }, [router]);
+  return null;
+}
 
 export default function LoginPage() {
   const { signIn } = useAuthActions();
   const router = useRouter();
 
   const handleGoogleSignIn = async () => {
-    await signIn("google", { redirectTo: "/" });
+    await signIn("google");
   };
 
   return (
+    <>
+      <Authenticated>
+        <RedirectToHome router={router} />
+      </Authenticated>
+      <Unauthenticated>
     <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-yellow-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Logo */}
@@ -53,5 +66,7 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+      </Unauthenticated>
+    </>
   );
 }

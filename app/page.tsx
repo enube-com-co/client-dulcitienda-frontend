@@ -4,13 +4,34 @@ import { useEffect, useState } from "react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import Link from "next/link";
-import { useSession } from "@convex-dev/auth/react";
+import { Authenticated, Unauthenticated, useAuthActions } from "@convex-dev/auth/react";
 import { ShoppingCart, Menu, X, Phone, MapPin, Mail, ChevronRight, Star, Truck, Shield, Clock, User } from "lucide-react";
 import SearchDropdown from "@/components/SearchDropdown";
 import { SLOGAN } from "@/lib/brand";
 
+// User button component for authenticated users
+function UserButton() {
+  return (
+    <Link href="/perfil" className="hidden md:flex items-center gap-2 text-gray-700 hover:text-pink-600 transition-colors">
+      <div className="w-8 h-8 bg-gradient-to-br from-pink-500 to-yellow-400 rounded-full flex items-center justify-center">
+        <User size={16} className="text-white" />
+      </div>
+      <span className="text-sm font-medium">Perfil</span>
+    </Link>
+  );
+}
+
+// Login button component for unauthenticated users
+function LoginButton() {
+  return (
+    <Link href="/login" className="hidden md:flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-pink-500 to-yellow-400 text-white rounded-full font-medium hover:shadow-lg transition-all">
+      <User size={18} />
+      Entrar
+    </Link>
+  );
+}
+
 export default function Home() {
-  const session = useSession();
   const [mounted, setMounted] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const products = useQuery(api.products.getFeaturedProducts, { limit: 8 });
@@ -93,31 +114,12 @@ export default function Home() {
               </Link>
               
               {/* Login / User Button */}
-              {session.isLoading ? (
-                <div className="hidden md:flex items-center gap-2 text-gray-700">
-                  <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse" />
-                </div>
-              ) : session.user ? (
-                <Link href="/perfil" className="hidden md:flex items-center gap-2 text-gray-700 hover:text-pink-600 transition-colors">
-                  {session.user.image ? (
-                    <img 
-                      src={session.user.image} 
-                      alt={session.user.name || "User"} 
-                      className="w-8 h-8 rounded-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-8 h-8 bg-gradient-to-br from-pink-500 to-yellow-400 rounded-full flex items-center justify-center">
-                      <User size={16} className="text-white" />
-                    </div>
-                  )}
-                  <span className="text-sm font-medium">{session.user.name}</span>
-                </Link>
-              ) : (
-                <Link href="/login" className="hidden md:flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-pink-500 to-yellow-400 text-white rounded-full font-medium hover:shadow-lg transition-all">
-                  <User size={18} />
-                  Entrar
-                </Link>
-              )}
+              <Authenticated>
+                <UserButton />
+              </Authenticated>
+              <Unauthenticated>
+                <LoginButton />
+              </Unauthenticated>
               
               <button 
                 className="md:hidden p-2"
