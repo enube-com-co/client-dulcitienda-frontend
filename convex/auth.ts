@@ -8,10 +8,13 @@ export const { auth, signIn, signOut, store } = convexAuth({
       clientSecret: process.env.AUTH_GOOGLE_SECRET!,
     }),
   ],
+  // @ts-ignore - Type issues with createOrUpdateUser callback
   callbacks: {
-    async profile(profile) {
+    async createOrUpdateUser(ctx: any, args: any) {
+      const { existingUserId, profile } = args;
+      
       // Determine role based on email
-      const email = profile.email?.toLowerCase() || "";
+      const email = (profile.email as string)?.toLowerCase() || "";
       let role: "admin" | "power_user" | "customer" = "customer";
       
       if (email === "andres.monje@enube.com.co") {
@@ -20,14 +23,27 @@ export const { auth, signIn, signOut, store } = convexAuth({
         role = "power_user";
       }
       
-      return {
-        id: profile.sub,
-        name: profile.name,
+      // If user already exists, update role
+      if (existingUserId) {
+        await ctx.db.patch(existingUserId, {
+          role,
+          customerTier: "bronze",
+        });
+        return existingUserId;
+      }
+      
+      // Create new user and return the ID
+      const userId = await ctx.db.insert("users", {
         email: profile.email,
-        image: profile.picture,
+        name: profile.name || profile.email?.split("@")[0],
+        image: profile.image,
         role,
         customerTier: "bronze",
-      };
+        isActive: true,
+        createdAt: Date.now(),
+      });
+      
+      return userId;
     },
   },
 });
