@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { ConvexClientProvider } from "./ConvexClientProvider";
 import { ConvexAuthProvider } from "@convex-dev/auth/react";
+import { ConvexReactClient } from "convex/react";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -13,6 +13,8 @@ const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
 });
+
+const convex = new ConvexReactClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
 export const metadata: Metadata = {
   title: "Dulcitienda | Distribuidora Mayorista de Dulces y Licores en Neiva",
@@ -129,9 +131,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ConvexClientProvider>
-          <ConvexAuthProvider>{children}</ConvexAuthProvider>
-        </ConvexClientProvider>
+        <ConvexAuthProvider client={convex}>{children}</ConvexAuthProvider>
       </body>
     </html>
   );
