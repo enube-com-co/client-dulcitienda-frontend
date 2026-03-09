@@ -1,9 +1,10 @@
-import { convexAuthNextjsMiddleware } from "@convex-dev/auth/nextjs/server";
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
-export default convexAuthNextjsMiddleware();
+export function middleware(request: NextRequest) {
+  return NextResponse.next();
+}
 
 export const config = {
-  // The following matcher runs middleware on all routes
-  // except static assets.
-  matcher: ["/((?!.*\\..*|_next).*)", "/", "/(api|trpc)(.*)"],
+  matcher: [],
 };
