@@ -182,7 +182,7 @@ export default function Home() {
                 key={category._id} 
                 href={`/catalogo?categoria=${category.slug}`}
                 className="group"
-003e
+              >
                 <div className={`h-32 bg-gradient-to-br ${categoryColors[category.slug] || "from-pink-500 to-purple-600"} rounded-2xl flex flex-col items-center justify-center text-white shadow-lg group-hover:shadow-xl transition-shadow`}>
                   <span className="text-4xl mb-2">{categoryIcons[category.slug] || "🍬"}</span>
                   <span className="font-bold capitalize">{category.name}</span>
