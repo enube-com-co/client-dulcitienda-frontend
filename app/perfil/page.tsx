@@ -1,20 +1,17 @@
 "use client";
 
-import { Authenticated, Unauthenticated, useAuthActions } from "@convex-dev/auth/react";
+import { useAuthActions } from "@convex-dev/auth/react";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { User, Package, MapPin, LogOut, Crown, ChevronRight, Sparkles } from "lucide-react";
-import Link from "next/link";
 import { api } from "@/convex/_generated/api";
 import { useQuery } from "convex/react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { User, Package, MapPin, LogOut, Crown, ChevronRight, Sparkles, Loader2 } from "lucide-react";
+import Link from "next/link";
 
-// Profile content for authenticated users
-function ProfileContent() {
+export default function ProfilePage() {
   const { signOut } = useAuthActions();
   const router = useRouter();
-  
-  // Get user from Convex auth
   const user = useQuery(api.users.getCurrentUser);
 
   const handleLogout = async () => {
@@ -25,13 +22,32 @@ function ProfileContent() {
   if (user === undefined) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-4 border-pink-500 border-t-transparent"></div>
+        <Loader2 className="w-8 h-8 animate-spin text-pink-500" />
       </div>
     );
   }
 
-  const role = user?.role || "customer";
-  const customerTier = user?.customerTier || "bronze";
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <Card className="w-full max-w-md p-8 text-center">
+          <div className="w-16 h-16 bg-pink-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <User className="w-8 h-8 text-pink-600" />
+          </div>
+          <h1 className="text-xl font-bold mb-2">No has iniciado sesión</h1>
+          <p className="text-gray-500 mb-6">Inicia sesión para ver tu perfil y pedidos</p>
+          <Link href="/login">
+            <Button className="w-full bg-gradient-to-r from-pink-500 to-yellow-400">
+              Iniciar sesión
+            </Button>
+          </Link>
+        </Card>
+      </div>
+    );
+  }
+
+  const role = user.role || "customer";
+  const customerTier = user.customerTier || "bronze";
 
   const getTierColor = (tier: string) => {
     switch (tier) {
@@ -58,15 +74,15 @@ function ProfileContent() {
         <div className="bg-gradient-to-r from-pink-500 to-yellow-400 rounded-2xl p-8 text-white mb-8">
           <div className="flex items-center gap-4">
             <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center overflow-hidden">
-              {user?.image ? (
+              {user.image ? (
                 <img src={user.image} alt={user.name || ""} className="w-full h-full object-cover" />
               ) : (
                 <User size={40} />
               )}
             </div>
             <div>
-              <h1 className="text-2xl font-bold">{user?.name || "Usuario"}</h1>
-              <p className="text-white/80">{user?.email || ""}</p>
+              <h1 className="text-2xl font-bold">{user.name}</h1>
+              <p className="text-white/80">{user.email}</p>
               <div className="flex items-center gap-2 mt-2">
                 <Crown size={16} className={getTierColor(customerTier)} />
                 <span className={`text-sm font-medium ${getTierColor(customerTier)}`}>
@@ -141,38 +157,5 @@ function ProfileContent() {
         </div>
       </div>
     </div>
-  );
-}
-
-// Login prompt for unauthenticated users
-function LoginPrompt() {
-  return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md p-8 text-center">
-        <div className="w-16 h-16 bg-pink-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <User className="w-8 h-8 text-pink-600" />
-        </div>
-        <h1 className="text-xl font-bold mb-2">No has iniciado sesión</h1>
-        <p className="text-gray-500 mb-6">Inicia sesión para ver tu perfil y pedidos</p>
-        <Link href="/login">
-          <Button className="w-full bg-gradient-to-r from-pink-500 to-yellow-400">
-            Iniciar sesión
-          </Button>
-        </Link>
-      </Card>
-    </div>
-  );
-}
-
-export default function ProfilePage() {
-  return (
-    <>
-      <Authenticated>
-        <ProfileContent />
-      </Authenticated>
-      <Unauthenticated>
-        <LoginPrompt />
-      </Unauthenticated>
-    </>
   );
 }

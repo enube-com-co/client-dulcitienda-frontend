@@ -4,34 +4,14 @@ import { useEffect, useState } from "react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import Link from "next/link";
-import { Authenticated, Unauthenticated, useAuthActions } from "@convex-dev/auth/react";
+import { useAuthActions } from "@convex-dev/auth/react";
 import { ShoppingCart, Menu, X, Phone, MapPin, Mail, ChevronRight, Star, Truck, Shield, Clock, User } from "lucide-react";
 import SearchDropdown from "@/components/SearchDropdown";
 import { SLOGAN } from "@/lib/brand";
 
-// User button component for authenticated users
-function UserButton() {
-  return (
-    <Link href="/perfil" className="hidden md:flex items-center gap-2 text-gray-700 hover:text-pink-600 transition-colors">
-      <div className="w-8 h-8 bg-gradient-to-br from-pink-500 to-yellow-400 rounded-full flex items-center justify-center">
-        <User size={16} className="text-white" />
-      </div>
-      <span className="text-sm font-medium">Perfil</span>
-    </Link>
-  );
-}
-
-// Login button component for unauthenticated users
-function LoginButton() {
-  return (
-    <Link href="/login" className="hidden md:flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-pink-500 to-yellow-400 text-white rounded-full font-medium hover:shadow-lg transition-all">
-      <User size={18} />
-      Entrar
-    </Link>
-  );
-}
-
 export default function Home() {
+  const { signOut } = useAuthActions();
+  const user = useQuery(api.users.getCurrentUser);
   const [mounted, setMounted] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const products = useQuery(api.products.getFeaturedProducts, { limit: 8 });
@@ -114,12 +94,27 @@ export default function Home() {
               </Link>
               
               {/* Login / User Button */}
-              <Authenticated>
-                <UserButton />
-              </Authenticated>
-              <Unauthenticated>
-                <LoginButton />
-              </Unauthenticated>
+              {user ? (
+                <Link href="/perfil" className="hidden md:flex items-center gap-2 text-gray-700 hover:text-pink-600 transition-colors">
+                  {user.image ? (
+                    <img 
+                      src={user.image} 
+                      alt={user.name || "User"} 
+                      className="w-8 h-8 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-8 h-8 bg-gradient-to-br from-pink-500 to-yellow-400 rounded-full flex items-center justify-center">
+                      <User size={16} className="text-white" />
+                    </div>
+                  )}
+                  <span className="text-sm font-medium">{user.name?.split(" ")[0] || "Perfil"}</span>
+                </Link>
+              ) : (
+                <Link href="/login" className="hidden md:flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-pink-500 to-yellow-400 text-white rounded-full font-medium hover:shadow-lg transition-all">
+                  <User size={18} />
+                  Entrar
+                </Link>
+              )}
               
               <button 
                 className="md:hidden p-2"
@@ -132,144 +127,65 @@ export default function Home() {
         </div>
 
         {/* Navigation */}
-        <nav className="hidden md:block border-t border-gray-100">
+        <nav className="hidden md:block bg-pink-50 border-t border-pink-100">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center gap-8 py-3">
+            <div className="flex items-center gap-8 h-12">
               <Link href="/catalogo" className="text-gray-700 hover:text-pink-600 font-medium transition-colors">
                 Catálogo
               </Link>
-              {categories?.slice(0, 4).map((cat) => (
-                <Link 
-                  key={cat._id} 
-                  href={`/catalogo?categoria=${cat._id}`}
-                  className="text-gray-700 hover:text-pink-600 font-medium transition-colors"
-                >
-                  {cat.name}
-                </Link>
-              ))}
-              <Link href="/carrito" className="text-gray-700 hover:text-pink-600 font-medium transition-colors">
-                Carrito
+              <Link href="/catalogo?categoria=gaseosas" className="text-gray-700 hover:text-pink-600 font-medium transition-colors">
+                Gaseosas
+              </Link>
+              <Link href="/catalogo?categoria=snacks" className="text-gray-700 hover:text-pink-600 font-medium transition-colors">
+                Snacks
+              </Link>
+              <Link href="/catalogo?categoria=dulces" className="text-gray-700 hover:text-pink-600 font-medium transition-colors">
+                Dulces
+              </Link>
+              <Link href="/catalogo?categoria=licores" className="text-gray-700 hover:text-pink-600 font-medium transition-colors">
+                Licores
+              </Link>
+              <Link href="/contacto" className="text-gray-700 hover:text-pink-600 font-medium transition-colors">
+                Contacto
               </Link>
             </div>
           </div>
         </nav>
 
+        {/* Mobile Menu */}
         {mobileMenuOpen && (
           <div className="md:hidden bg-white border-t">
             <div className="px-4 py-4 space-y-3">
-              <Link href="/catalogo" className="block py-2 text-gray-700">Catálogo</Link>
-              {categories?.slice(0, 4).map((cat) => (
-                <Link key={cat._id} href={`/catalogo?categoria=${cat._id}`} className="block py-2 text-gray-700">
-                  {cat.name}
-                </Link>
-              ))}
-              <Link href="/carrito" className="block py-2 text-gray-700">Carrito</Link>
+              <div className="mb-4">
+                <SearchDropdown />
+              </div>
+              <Link href="/catalogo" className="block py-2 text-gray-700 hover:text-pink-600">Catálogo</Link>
+              <Link href="/catalogo?categoria=gaseosas" className="block py-2 text-gray-700 hover:text-pink-600">Gaseosas</Link>
+              <Link href="/catalogo?categoria=snacks" className="block py-2 text-gray-700 hover:text-pink-600">Snacks</Link>
+              <Link href="/catalogo?categoria=dulces" className="block py-2 text-gray-700 hover:text-pink-600">Dulces</Link>
+              <Link href="/catalogo?categoria=licores" className="block py-2 text-gray-700 hover:text-pink-600">Licores</Link>
+              <Link href="/carrito" className="block py-2 text-gray-700 hover:text-pink-600">Carrito</Link>
+              <Link href="/login" className="block py-2 text-gray-700 hover:text-pink-600">{user ? "Mi Perfil" : "Iniciar sesión"}</Link>
             </div>
           </div>
         )}
       </header>
 
-      {/* Hero - Fondo azul como el logo oficial */}
-      <section className="relative bg-gradient-to-br from-blue-800 via-blue-700 to-pink-500 text-white overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute inset-0" style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
-          }}></div>
-        </div>
-        
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            <div>
-              <span className="inline-block px-4 py-2 bg-pink-500/20 backdrop-blur-sm rounded-full text-sm font-bold mb-6 border border-pink-300/30">
-                ✨ {SLOGAN}
-              </span>
-              <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
-                Distribuidora de <span className="text-yellow-200">Abarrotes</span> al Por Mayor
-              </h1>
-              <p className="text-xl text-white/90 mb-8">
-                Gaseosas, snacks, dulces y licores con los mejores precios mayoristas para tu negocio en Neiva y el Huila
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Link href="/catalogo">
-                  <button className="px-8 py-4 bg-pink-500 hover:bg-pink-600 text-white rounded-full font-bold text-lg shadow-xl hover:shadow-2xl hover:scale-105 transition-all flex items-center justify-center gap-2">
-                    Ver Catálogo <ChevronRight size={20} />
-                  </button>
-                </Link>
-                <a href="https://wa.me/573132309867">
-                  <button className="px-8 py-4 bg-yellow-300 hover:bg-yellow-400 text-blue-900 rounded-full font-bold text-lg shadow-xl hover:shadow-2xl hover:scale-105 transition-all">
-                    💬 Pedir por WhatsApp
-                  </button>
-                </a>
-              </div>
-            </div>
-            
-            {/* Stats Cards */}
-            <div className="grid grid-cols-2 gap-4">
-              {[
-                { number: "385+", label: "Clientes", icon: "👥" },
-                { number: "550+", label: "Productos", icon: "📦" },
-                { number: "535+", label: "Entregas/mes", icon: "🚚" },
-                { number: "3+", label: "Años", icon: "⭐" },
-              ].map((stat, idx) => (
-                <div key={idx} className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 text-center border border-white/20">
-                  <div className="text-3xl mb-2">{stat.icon}</div>
-                  <div className="text-3xl font-bold">{stat.number}</div>
-                  <div className="text-white/80 text-sm">{stat.label}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Features */}
-      <section className="py-8 bg-gray-50 border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {[
-              { icon: Truck, title: "Envío Gratis", desc: "En Neiva +$200k" },
-              { icon: Shield, title: "Garantía", desc: "Productos frescos" },
-              { icon: Clock, title: "Entrega Rápida", desc: "24-48 horas" },
-              { icon: Star, title: "Calidad", desc: "Marcas originales" },
-            ].map((feature, idx) => (
-              <div key={idx} className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-pink-100 to-yellow-100 rounded-xl flex items-center justify-center text-pink-600">
-                  <feature.icon size={24} />
-                </div>
-                <div>
-                  <h3 className="font-bold text-gray-800">{feature.title}</h3>
-                  <p className="text-sm text-gray-500">{feature.desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Categories */}
-      <section className="py-16">
+      <section className="py-12 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">Compra por Categoría</h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">
-              Encuentra todo lo que necesitas para surtir tu negocio al mejor precio
-            </p>
-          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-8">Categorías</h2>
           
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {categories?.slice(0, 4).map((category, idx) => (
-              <Link key={category._id} href={`/catalogo?categoria=${category._id}`}>
-                <div className="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer">
-                  <div className={`h-48 bg-gradient-to-br ${categoryColors[category.slug] || 'from-pink-400 to-yellow-400'} flex items-center justify-center`}>
-                    <span className="text-6xl group-hover:scale-125 transition-transform duration-300">
-                      {categoryIcons[category.slug] || "📦"}
-                    </span>
-                  </div>
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                  <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-                    <h3 className="text-xl font-bold">{category.name}</h3>
-                    <p className="text-white/80 text-sm">Ver productos →</p>
-                  </div>
+            {categories?.map((category) => (
+              <Link 
+                key={category._id} 
+                href={`/catalogo?categoria=${category.slug}`}
+                className="group"
+003e
+                <div className={`h-32 bg-gradient-to-br ${categoryColors[category.slug] || "from-pink-500 to-purple-600"} rounded-2xl flex flex-col items-center justify-center text-white shadow-lg group-hover:shadow-xl transition-shadow`}>
+                  <span className="text-4xl mb-2">{categoryIcons[category.slug] || "🍬"}</span>
+                  <span className="font-bold capitalize">{category.name}</span>
                 </div>
               </Link>
             ))}
@@ -278,38 +194,44 @@ export default function Home() {
       </section>
 
       {/* Featured Products */}
-      <section className="py-16 bg-gray-50">
+      <section className="py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between mb-12">
-            <div>
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-2">Productos Destacados</h2>
-              <p className="text-gray-600">Los más vendidos por nuestros clientes</p>
-            </div>
-            <Link href="/catalogo" className="hidden md:flex items-center gap-2 text-pink-600 font-medium hover:text-pink-700">
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-2xl font-bold text-gray-900">Productos Destacados</h2>
+            <Link href="/catalogo" className="text-pink-600 hover:text-pink-700 font-medium flex items-center gap-1">
               Ver todos <ChevronRight size={20} />
             </Link>
           </div>
           
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {products?.map((product) => (
-              <Link key={product._id} href={`/producto/${product.sku}`}>
-                <div className="group bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-pink-200">
-                  <div className="aspect-square bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center group-hover:from-pink-50 group-hover:to-yellow-50 transition-colors relative">
-                    <span className="text-5xl group-hover:scale-110 transition-transform">📦</span>
+              <Link key={product._id} href={`/producto/${product.sku}`} className="group">
+                <div className="bg-white rounded-xl shadow-md overflow-hidden group-hover:shadow-lg transition-shadow">
+                  <div className="aspect-square bg-gray-100 relative">
+                    {product.images[0] ? (
+                      <img 
+                        src={product.images[0]} 
+                        alt={product.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-4xl">🍬</div>
+                    )}
                     {product.isFeatured && (
-                      <span className="absolute top-3 left-3 px-3 py-1 bg-gradient-to-r from-pink-500 to-yellow-400 text-white text-xs font-bold rounded-full">
-                        DESTACADO
+                      <span className="absolute top-2 left-2 bg-gradient-to-r from-pink-500 to-yellow-400 text-white text-xs font-bold px-2 py-1 rounded-full">
+                        Destacado
                       </span>
                     )}
                   </div>
-                  <div className="p-5">
-                    <h3 className="font-bold text-gray-800 mb-1 line-clamp-2 hover:text-pink-600 transition-colors">
-                      {product.name}
-                    </h3>
-                    <p className="text-xs text-gray-500 mb-3">SKU: {product.sku}</p>
+                  <div className="p-4">
+                    <p className="text-sm text-gray-500 mb-1">{product.categoryId}</p>
+                    <h3 className="font-bold text-gray-900 mb-2 line-clamp-2">{product.name}</h3>
                     <div className="flex items-center justify-between">
-                      <span className="text-xl font-bold text-pink-600">
+                      <span className="text-lg font-bold text-pink-600">
                         ${product.basePrice.toLocaleString()}
+                      </span>
+                      <span className="text-xs text-gray-500">
+                        Min: {product.minimumOrderQuantity}
                       </span>
                     </div>
                   </div>
@@ -317,116 +239,67 @@ export default function Home() {
               </Link>
             ))}
           </div>
-          
-          <div className="text-center mt-10 md:hidden">
-            <Link href="/catalogo">
-              <button className="px-8 py-3 bg-gradient-to-r from-pink-500 to-yellow-400 text-white rounded-full font-semibold">
-                Ver todos los productos
-              </button>
-            </Link>
-          </div>
         </div>
       </section>
 
-      {/* About */}
-      <section className="py-16">
+      {/* Why Choose Us */}
+      <section className="py-12 bg-gradient-to-r from-pink-500 to-yellow-400 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            <div className="bg-gradient-to-br from-pink-100 to-yellow-100 rounded-3xl p-8 md:p-12">
-              <div className="text-6xl mb-6">🍬</div>
-              <h2 className="text-3xl font-bold text-gray-800 mb-4">
-                {SLOGAN}
-              </h2>
-              <p className="text-gray-600 mb-6">
-                Somos una empresa con la misión de ponerle el toque dulce a la vida. 
-                Tenemos más de 3 años siendo los mejores aliados de pequeñas y grandes 
-                empresas con sueños y metas de crecimiento, a quienes les hemos brindado 
-                nuestro apoyo con la distribución de dulces, chocolates, gomas y licores 
-                con precios de mayoristas en Neiva y el Huila.
-              </p>
-              <div className="flex flex-wrap gap-3">
-                {["Precios de mayorista", "Entrega a domicilio", "Atención personalizada", "Más de 550 productos"].map((item, idx) => (
-                  <span key={idx} className="px-4 py-2 bg-white rounded-full text-sm font-medium text-gray-700 shadow-sm">
-                    ✓ {item}
-                  </span>
-                ))}
-              </div>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
+            <div>
+              <Truck size={40} className="mx-auto mb-4" />
+              <h3 className="font-bold text-lg mb-2">Envío Gratis</h3>
+              <p className="text-white/80">En pedidos mayores a $200.000 en Neiva</p>
             </div>
             
-            <div className="grid grid-cols-2 gap-4">
-              {[
-                { icon: "🏆", title: "Calidad Garantizada", desc: "Productos originales" },
-                { icon: "🚚", title: "Entrega Rápida", desc: "24-48 horas en Neiva" },
-                { icon: "👥", title: "Atención 24/7", desc: "Soporte personalizado" },
-                { icon: "💰", title: "Mejores Precios", desc: "Precios de mayorista" },
-              ].map((item, idx) => (
-                <div key={idx} className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 text-center hover:shadow-xl transition-shadow">
-                  <div className="text-4xl mb-3">{item.icon}</div>
-                  <h3 className="font-bold text-gray-800 mb-1">{item.title}</h3>
-                  <p className="text-sm text-gray-500">{item.desc}</p>
-                </div>
-              ))}
+            <div>
+              <Shield size={40} className="mx-auto mb-4" />
+              <h3 className="font-bold text-lg mb-2">Productos Garantizados</h3>
+              <p className="text-white/80">Calidad en todos nuestros productos</p>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA - Colores exactos del logo */}
-      <section className="py-16 bg-gradient-to-r from-blue-800 via-blue-700 to-pink-500 text-white">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            ¿Listo para surtir tu negocio?
-          </h2>
-          <p className="text-xl text-white/90 mb-8">
-            Contáctanos y recibe atención personalizada para tu pedido en Neiva
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a href="https://wa.me/573132309867">
-              <button className="px-8 py-4 bg-pink-500 hover:bg-pink-600 text-white rounded-full font-bold text-lg shadow-xl hover:shadow-2xl hover:scale-105 transition-all flex items-center justify-center gap-2">
-                💬 WhatsApp
-              </button>
-            </a>
-            <a href="tel:+573132309867">
-              <button className="px-8 py-4 bg-yellow-300 hover:bg-yellow-400 text-blue-900 rounded-full font-bold text-lg shadow-xl hover:shadow-2xl hover:scale-105 transition-all flex items-center justify-center gap-2">
-                📞 Llamar
-              </button>
-            </a>
+            
+            <div>
+              <Clock size={40} className="mx-auto mb-4" />
+              <h3 className="font-bold text-lg mb-2">Entrega Rápida</h3>
+              <p className="text-white/80">Same-day delivery en Neiva</p>
+            </div>
+            
+            <div>
+              <Star size={40} className="mx-auto mb-4" />
+              <h3 className="font-bold text-lg mb-2">Atención Personalizada</h3>
+              <p className="text-white/80">Asesoría para tu negocio</p>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white pt-16 pb-8">
+      <footer className="bg-gray-900 text-white py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-4 gap-8 mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 bg-gradient-to-br from-pink-500 to-yellow-400 rounded-lg flex items-center justify-center text-xl">
+                <div className="w-10 h-10 bg-gradient-to-br from-pink-400 to-yellow-300 rounded-xl flex items-center justify-center text-xl">
                   🍬
                 </div>
                 <span className="text-xl font-bold">Dulcitienda</span>
               </div>
-              <p className="text-gray-400 text-sm">
-                {SLOGAN} Distribuidora de dulces, chocolates, gomas, licores y mucho más a nivel nacional.
-              </p>
+              <p className="text-gray-400">Distribuidora mayorista de dulces, snacks y licores en Neiva.</p>
             </div>
             
             <div>
-              <h3 className="font-bold text-lg mb-4">Categorías</h3>
+              <h4 className="font-bold mb-4">Categorías</h4>
               <ul className="space-y-2 text-gray-400">
-                {categories?.slice(0, 4).map((cat) => (
-                  <li key={cat._id}>
-                    <Link href={`/catalogo?categoria=${cat._id}`} className="hover:text-pink-400 transition-colors">
-                      {cat.name}
-                    </Link>
-                  </li>
-                ))}
+                <li><Link href="/catalogo?categoria=gaseosas" className="hover:text-white">Gaseosas</Link></li>
+                <li><Link href="/catalogo?categoria=snacks" className="hover:text-white">Snacks</Link></li>
+                <li><Link href="/catalogo?categoria=dulces" className="hover:text-white">Dulces</Link></li>
+                <li><Link href="/catalogo?categoria=licores" className="hover:text-white">Licores</Link></li>
               </ul>
             </div>
             
             <div>
-              <h3 className="font-bold text-lg mb-4">Contacto</h3>
-              <ul className="space-y-3 text-gray-400">
+              <h4 className="font-bold mb-4">Contacto</h4>
+              <ul className="space-y-2 text-gray-400">
                 <li className="flex items-center gap-2">
                   <MapPin size={16} /> Cra 3 # 7-12 Centro, Neiva
                 </li>
@@ -440,20 +313,14 @@ export default function Home() {
             </div>
             
             <div>
-              <h3 className="font-bold text-lg mb-4">Síguenos</h3>
-              <div className="flex gap-3">
-                <a href="https://web.facebook.com/dulcitienda/?locale=es_LA" target="_blank" rel="noopener noreferrer" className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-gradient-to-r hover:from-pink-500 hover:to-yellow-400 transition-all text-sm">
-                  F
-                </a>
-                <a href="https://www.instagram.com/midulcitienda/?hl=es" target="_blank" rel="noopener noreferrer" className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-gradient-to-r hover:from-pink-500 hover:to-yellow-400 transition-all text-sm">
-                  I
-                </a>
-              </div>
+              <h4 className="font-bold mb-4">Horario</h4>
+              <p className="text-gray-400">Lunes a Sábado</p>
+              <p className="text-gray-400">8:00 AM - 6:00 PM</p>
             </div>
           </div>
           
-          <div className="border-t border-gray-800 pt-8 text-center text-gray-500 text-sm">
-            <p>© 2025 Dulcitienda. {SLOGAN} Todos los derechos reservados.</p>
+          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+            <p>© 2025 Dulcitienda. Todos los derechos reservados.</p>
           </div>
         </div>
       </footer>
