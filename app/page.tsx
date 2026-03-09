@@ -4,12 +4,13 @@ import { useEffect, useState } from "react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import Link from "next/link";
+import { useSession } from "@convex-dev/auth/react";
 import { ShoppingCart, Menu, X, Phone, MapPin, Mail, ChevronRight, Star, Truck, Shield, Clock, User } from "lucide-react";
 import SearchDropdown from "@/components/SearchDropdown";
 import { SLOGAN } from "@/lib/brand";
 
 export default function Home() {
-  const [user, setUser] = useState<{ email: string; name: string } | null>(null);
+  const session = useSession();
   const [mounted, setMounted] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const products = useQuery(api.products.getFeaturedProducts, { limit: 8 });
@@ -17,17 +18,7 @@ export default function Home() {
 
   useEffect(() => {
     setMounted(true);
-    // Load user from localStorage
-    const savedUser = localStorage.getItem("dulcitienda_user");
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
-    }
   }, []);
-
-  const handleLogout = () => {
-    localStorage.removeItem("dulcitienda_user");
-    setUser(null);
-  };
 
   const showLoading = !mounted || products === undefined || categories === undefined;
   
@@ -102,12 +93,24 @@ export default function Home() {
               </Link>
               
               {/* Login / User Button */}
-              {user ? (
+              {session.isLoading ? (
+                <div className="hidden md:flex items-center gap-2 text-gray-700">
+                  <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse" />
+                </div>
+              ) : session.user ? (
                 <Link href="/perfil" className="hidden md:flex items-center gap-2 text-gray-700 hover:text-pink-600 transition-colors">
-                  <div className="w-8 h-8 bg-gradient-to-br from-pink-500 to-yellow-400 rounded-full flex items-center justify-center">
-                    <User size={16} className="text-white" />
-                  </div>
-                  <span className="text-sm font-medium">{user.name}</span>
+                  {session.user.image ? (
+                    <img 
+                      src={session.user.image} 
+                      alt={session.user.name || "User"} 
+                      className="w-8 h-8 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-8 h-8 bg-gradient-to-br from-pink-500 to-yellow-400 rounded-full flex items-center justify-center">
+                      <User size={16} className="text-white" />
+                    </div>
+                  )}
+                  <span className="text-sm font-medium">{session.user.name}</span>
                 </Link>
               ) : (
                 <Link href="/login" className="hidden md:flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-pink-500 to-yellow-400 text-white rounded-full font-medium hover:shadow-lg transition-all">

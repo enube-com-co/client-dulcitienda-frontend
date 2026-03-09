@@ -1,46 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useAuthActions } from "@convex-dev/auth/react";
 import { useRouter } from "next/navigation";
-import { useMutation } from "convex/react";
-import { api } from "@/convex/_generated/api";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Mail, ArrowRight, User } from "lucide-react";
+import { Chrome } from "lucide-react";
 
 export default function LoginPage() {
+  const { signIn } = useAuthActions();
   const router = useRouter();
-  const createOrUpdateUser = useMutation(api.users.createOrUpdateFromLogin);
-  
-  const [email, setEmail] = useState("");
-  const [name, setName] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    
-    try {
-      // Create/update user in Convex
-      const userId = await createOrUpdateUser({ email, name });
-      
-      // Save to localStorage for UI state
-      localStorage.setItem("dulcitienda_user", JSON.stringify({ 
-        id: userId,
-        email: email.toLowerCase().trim(), 
-        name: name.trim() 
-      }));
-      
-      setSubmitted(true);
-      setTimeout(() => router.push("/"), 1000);
-    } catch (error) {
-      console.error("Login error:", error);
-      alert("Error al iniciar sesión. Intenta de nuevo.");
-    } finally {
-      setLoading(false);
-    }
+  const handleGoogleSignIn = async () => {
+    await signIn("google", { redirectTo: "/" });
   };
 
   return (
@@ -57,63 +28,22 @@ export default function LoginPage() {
           <p className="text-gray-500 mt-2">Accede a tu cuenta</p>
         </div>
 
-        {/* Form */}
+        {/* Google Sign In */}
         <div className="bg-white rounded-2xl shadow-xl p-8">
-          {submitted ? (
-            <div className="text-center py-8">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
-              <p className="text-gray-700">¡Bienvenido! Redirigiendo...</p>
-            </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Nombre
-                </label>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-                  <Input
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Tu nombre"
-                    className="pl-10 h-12"
-                    required
-                  />
-                </div>
-              </div>
+          <Button
+            onClick={handleGoogleSignIn}
+            className="w-full h-14 bg-white border-2 border-gray-200 hover:bg-gray-50 text-gray-700 font-semibold text-lg"
+            variant="outline"
+          >
+            <Chrome className="w-6 h-6 mr-3 text-blue-500" />
+            Continuar con Google
+          </Button>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Correo electrónico
-                </label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-                  <Input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="tu@email.com"
-                    className="pl-10 h-12"
-                    required
-                  />
-                </div>
-              </div>
-
-              <Button
-                type="submit"
-                disabled={loading}
-                className="w-full h-12 bg-gradient-to-r from-pink-500 to-yellow-400 hover:opacity-90 text-white font-semibold"
-              >
-                {loading ? "Entrando..." : "Continuar"}
-                <ArrowRight className="ml-2" size={18} />
-              </Button>
-            </form>
-          )}
+          <div className="mt-6 text-center">
+            <p className="text-sm text-gray-500">
+              Al continuar, aceptas nuestros términos y condiciones
+            </p>
+          </div>
         </div>
 
         <div className="text-center mt-6">

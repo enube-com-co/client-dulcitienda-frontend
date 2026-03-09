@@ -1,7 +1,10 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
+import { authTables } from "@convex-dev/auth/server";
 
 export default defineSchema({
+  // Auth tables from Convex Auth
+  ...authTables,
   // Products (5000+ SKUs)
   products: defineTable({
     sku: v.string(),

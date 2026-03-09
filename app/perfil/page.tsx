@@ -1,47 +1,31 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useAuthActions, useSession } from "@convex-dev/auth/react";
 import { useRouter } from "next/navigation";
-import { useQuery } from "convex/react";
-import { api } from "@/convex/_generated/api";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { User, Package, MapPin, LogOut, Crown, ChevronRight, Sparkles } from "lucide-react";
+import { User, Package, MapPin, LogOut, Crown, ChevronRight, Sparkles, Loader2 } from "lucide-react";
 import Link from "next/link";
 
 export default function ProfilePage() {
+  const { signOut } = useAuthActions();
+  const session = useSession();
   const router = useRouter();
-  const [localUser, setLocalUser] = useState<{ id: string; email: string; name: string } | null>(null);
-  const [loading, setLoading] = useState(true);
-  
-  // Get user from Convex using email
-  const convexUser = useQuery(
-    api.users.getByEmail, 
-    localUser?.email ? { email: localUser.email } : "skip"
-  );
 
-  useEffect(() => {
-    const savedUser = localStorage.getItem("dulcitienda_user");
-    if (savedUser) {
-      setLocalUser(JSON.parse(savedUser));
-    }
-    setLoading(false);
-  }, []);
-
-  const handleLogout = () => {
-    localStorage.removeItem("dulcitienda_user");
+  const handleLogout = async () => {
+    await signOut();
     router.push("/");
   };
 
-  if (loading) {
+  if (session.isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-4 border-pink-500 border-t-transparent"></div>
+        <Loader2 className="w-8 h-8 animate-spin text-pink-500" />
       </div>
     );
   }
 
-  if (!localUser) {
+  if (!session.user) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
         <Card className="w-full max-w-md p-8 text-center">
@@ -60,15 +44,11 @@ export default function ProfilePage() {
     );
   }
 
-  // Use Convex data if available, otherwise localStorage
-  const user = convexUser || {
-    name: localUser.name,
-    email: localUser.email,
-    role: "customer",
-    customerTier: "bronze",
-  };
-  
-  const getTierColor = (tier?: string) => {
+  const user = session.user;
+  const role = (user as any).role || "customer";
+  const customerTier = (user as any).customerTier || "bronze";
+
+  const getTierColor = (tier: string) => {
     switch (tier) {
       case "platinum": return "text-purple-600";
       case "gold": return "text-yellow-600";
@@ -76,8 +56,8 @@ export default function ProfilePage() {
       default: return "text-amber-700";
     }
   };
-  
-  const getTierName = (tier?: string) => {
+
+  const getTierName = (tier: string) => {
     switch (tier) {
       case "platinum": return "Platino";
       case "gold": return "Oro";
@@ -92,19 +72,23 @@ export default function ProfilePage() {
         {/* Header */}
         <div className="bg-gradient-to-r from-pink-500 to-yellow-400 rounded-2xl p-8 text-white mb-8">
           <div className="flex items-center gap-4">
-            <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center">
-              <User size={40} />
+            <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center overflow-hidden">
+              {user.image ? (
+                <img src={user.image} alt={user.name || ""} className="w-full h-full object-cover" />
+              ) : (
+                <User size={40} />
+              )}
             </div>
             <div>
               <h1 className="text-2xl font-bold">{user.name}</h1>
               <p className="text-white/80">{user.email}</p>
               <div className="flex items-center gap-2 mt-2">
-                <Crown size={16} className={getTierColor(user.customerTier)} />
-                <span className={`text-sm font-medium ${getTierColor(user.customerTier)}`}>
-                  Cliente {getTierName(user.customerTier)}
+                <Crown size={16} className={getTierColor(customerTier)} />
+                <span className={`text-sm font-medium ${getTierColor(customerTier)}`}>
+                  Cliente {getTierName(customerTier)}
                 </span>
               </div>            
-              {user.role === "admin" && (
+              {role === "admin" && (
                 <div className="flex items-center gap-2 mt-1">
                   <Sparkles size={14} className="text-yellow-200" />
                   <span className="text-xs bg-white/20 px-2 py-1 rounded-full">Administrador</span>
@@ -144,7 +128,7 @@ export default function ProfilePage() {
             <ChevronRight className="text-gray-400" />
           </Card>
           
-          {user.role === "admin" && (
+          {role === "admin" && (
             <Link href="/admin">
               <Card className="p-4 flex items-center justify-between hover:shadow-md transition-shadow border-pink-200">
                 <div className="flex items-center gap-4">
