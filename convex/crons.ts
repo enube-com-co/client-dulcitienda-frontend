@@ -1,6 +1,143 @@
 import { query, mutation, internalAction } from "./_generated/server";
 import { api } from "./_generated/api";
 import { v } from "convex/values";
+import { cronJobs } from "convex/server";
+
+// Define crons
+const crons = cronJobs();
+
+// Run every 5 minutes to check for new events
+crons.interval(
+  "check new events every 5 minutes",
+  { minutes: 5 },
+  api.crons.checkNewEvents,
+  {}
+);
+
+export default crons;
+
+// Check for new events (called by cron)
+export const checkNewEvents = internalAction({
+  args: {},
+  handler: async (ctx) => {
+    const fiveMinutesAgo = Date.now() - 5 * 60 * 1000;
+    const settings = await ctx.runQuery(api.notifications.getSettings);
+    
+    if (!settings) return;
+
+    // 1. Check for new orders
+    if (settings.notifyOnNewOrder !== false) {
+      const newOrders = await ctx.runQuery(api.orders.getRecentOrders, { since: fiveMinutesAgo });
+      
+      for (const order of newOrders) {
+        const customer = await ctx.db.get(order.customerId);
+        
+        // Format items list
+        const itemsList = order.items.map((item: any) => 
+          `• ${item.quantity}x ${item.name} - $${item.totalPrice.toLocaleString()}`
+        ).join('\n');
+        
+        const message = `🛒 NUEVO PEDIDO\n\n` +
+          `Orden: ${order.orderNumber}\n` +
+          `Cliente: ${customer?.name || 'N/A'}\n` +
+          `Tel: ${customer?.phone || order.whatsappPhone || 'N/A'}\n\n` +
+          `📦 PRODUCTOS:\n${itemsList}\n\n` +
+          `💰 TOTAL: $${order.totalAmount.toLocaleString()}`;
+
+        await ctx.runAction(api.crons.sendNotification, {
+          type: "new_order",
+          title: `Nuevo pedido: ${order.orderNumber}`,
+          message,
+          details: {
+            orderNumber: order.orderNumber,
+            items: order.items,
+            total: order.totalAmount,
+            customerName: customer?.name,
+            customerEmail: customer?.email,
+            customerPhone: customer?.phone || order.whatsappPhone,
+          },
+          orderId: order._id,
+        });
+      }
+    }
+
+    // 2. Check for low stock
+    if (settings.notifyOnLowStock !== false) {
+      const lowStockItems = await ctx.runQuery(api.inventory.getLowStock, { threshold: 10 });
+      
+      for (const item of lowStockItems) {
+        // Check if we already notified about this product recently (last hour)
+        const recentNotifications = await ctx.db
+          .query("notifications")
+          .filter((q) => q.and(
+            q.eq(q.field("type"), "low_stock"),
+            q.gt(q.field("createdAt"), Date.now() - 60 * 60 * 1000)
+          ))
+          .collect();
+        
+        const alreadyNotified = recentNotifications.some(
+          (n: any) => n.details?.productId === item.productId
+        );
+        
+        if (!alreadyNotified) {
+          const product = await ctx.db.get(item.productId);
+          
+          const message = `⚠️ STOCK BAJO\n\n` +
+            `Producto: ${product?.name || 'N/A'}\n` +
+            `SKU: ${product?.sku || 'N/A'}\n` +
+            `Stock actual: ${item.quantityAvailable} unidades\n` +
+            `Umbral mínimo: 10 unidades\n\n` +
+            `📦 Reabastecer urgentemente`;
+
+          await ctx.runAction(api.crons.sendNotification, {
+            type: "low_stock",
+            title: `Stock bajo: ${product?.name}`,
+            message,
+            details: {
+              productName: product?.name,
+              productSku: product?.sku,
+              currentStock: item.quantityAvailable,
+              threshold: 10,
+              productId: item.productId,
+            },
+            productId: item.productId,
+          });
+        }
+      }
+    }
+
+    // 3. Check for new customers
+    if (settings.notifyOnNewCustomer !== false) {
+      const newCustomers = await ctx.db
+        .query("users")
+        .filter((q) => q.gt(q.field("createdAt"), fiveMinutesAgo))
+        .collect();
+      
+      for (const customer of newCustomers) {
+        const message = `👤 NUEVO CLIENTE REGISTRADO\n\n` +
+          `Nombre: ${customer.name}\n` +
+          `Email: ${customer.email}\n` +
+          `Empresa: ${customer.company || 'No especificada'}\n` +
+          `Tel: ${customer.phone || 'No proporcionado'}\n\n` +
+          `Tier: ${customer.customerTier || 'Bronce'} (auto-asignado)`;
+
+        await ctx.runAction(api.crons.sendNotification, {
+          type: "new_customer",
+          title: `Nuevo cliente: ${customer.name}`,
+          message,
+          details: {
+            customerName: customer.name,
+            customerEmail: customer.email,
+            customerCompany: customer.company,
+            customerPhone: customer.phone,
+            customerTier: customer.customerTier,
+          },
+          customerId: customer._id,
+        });
+      }
+    }
+  },
+});
 
 // Send notification (internal function used by cron)
 export const sendNotification = internalAction({
@@ -55,127 +192,6 @@ export const sendNotification = internalAction({
         });
       } catch (error) {
         console.error("Failed to send WhatsApp:", error);
-      }
-    }
-  },
-});
-
-// Check for new events (called by cron)
-export const checkNewEvents = internalAction({
-  args: {},
-  handler: async (ctx) => {
-    const fiveMinutesAgo = Date.now() - 5 * 60 * 1000;
-    const settings = await ctx.runQuery(api.notifications.getSettings);
-    
-    if (!settings) return;
-
-    // 1. Check for new orders
-    if (settings.notifyOnNewOrder !== false) {
-      const newOrders = await ctx.runQuery(api.orders.getRecentOrders, { since: fiveMinutesAgo });
-      
-      for (const order of newOrders) {
-        const customer = await ctx.db.get(order.customerId);
-        
-        // Format items list
-        const itemsList = order.items.map((item: any) => 
-          `• ${item.quantity}x ${item.name} - $${item.totalPrice.toLocaleString()}`
-        ).join('\n');
-        
-        const message = `🛒 NUEVO PEDIDO\n\n` +
-          `Orden: ${order.orderNumber}\n` +
-          `Cliente: ${customer?.name || 'N/A'}\n` +
-          `Tel: ${customer?.phone || order.whatsappPhone || 'N/A'}\n\n` +
-          `📦 PRODUCTOS:\n${itemsList}\n\n` +
-          `💰 TOTAL: $${order.totalAmount.toLocaleString()}`;
-
-        await ctx.runAction(api.crons.sendNotification, {
-          type: "new_order",
-          title: `Nuevo pedido: ${order.orderNumber}`,
-          message,
-          details: {
-            orderNumber: order.orderNumber,
-            items: order.items,
-            total: order.totalAmount,
-            customerName: customer?.name,
-            customerEmail: customer?.email,
-            customerPhone: customer?.phone || order.whatsappPhone,
-          },
-          orderId: order._id,
-        });
-      }
-    }
-
-    // 2. Check for low stock
-    const lowStockItems = await ctx.runQuery(api.inventory.getLowStock, { threshold: 10 });
-    
-    for (const item of lowStockItems) {
-      // Check if we already notified about this product recently (last hour)
-      const recentNotifications = await ctx.db
-        .query("notifications")
-        .filter((q) => q.and(
-          q.eq(q.field("type"), "low_stock"),
-          q.gt(q.field("createdAt"), Date.now() - 60 * 60 * 1000)
-        ))
-        .collect();
-      
-      const alreadyNotified = recentNotifications.some(
-        (n: any) => n.details?.productId === item.productId
-      );
-      
-      if (!alreadyNotified) {
-        const product = await ctx.db.get(item.productId);
-        
-        const message = `⚠️ STOCK BAJO\n\n` +
-          `Producto: ${product?.name || 'N/A'}\n` +
-          `SKU: ${product?.sku || 'N/A'}\n` +
-          `Stock actual: ${item.quantityAvailable} unidades\n` +
-          `Umbral mínimo: 10 unidades\n\n` +
-          `📦 Reabastecer urgentemente`;
-
-        await ctx.runAction(api.crons.sendNotification, {
-          type: "low_stock",
-          title: `Stock bajo: ${product?.name}`,
-          message,
-          details: {
-            productName: product?.name,
-            productSku: product?.sku,
-            currentStock: item.quantityAvailable,
-            threshold: 10,
-            productId: item.productId,
-          },
-          productId: item.productId,
-        });
-      }
-    }
-
-    // 3. Check for new customers
-    if (settings.notifyOnNewCustomer !== false) {
-      const newCustomers = await ctx.db
-        .query("users")
-        .filter((q) => q.gt(q.field("createdAt"), fiveMinutesAgo))
-        .collect();
-      
-      for (const customer of newCustomers) {
-        const message = `👤 NUEVO CLIENTE REGISTRADO\n\n` +
-          `Nombre: ${customer.name}\n` +
-          `Email: ${customer.email}\n` +
-          `Empresa: ${customer.company || 'No especificada'}\n` +
-          `Tel: ${customer.phone || 'No proporcionado'}\n\n` +
-          `Tier: ${customer.customerTier || 'Bronce'} (auto-asignado)`;
-
-        await ctx.runAction(api.crons.sendNotification, {
-          type: "new_customer",
-          title: `Nuevo cliente: ${customer.name}`,
-          message,
-          details: {
-            customerName: customer.name,
-            customerEmail: customer.email,
-            customerCompany: customer.company,
-            customerPhone: customer.phone,
-            customerTier: customer.customerTier,
-          },
-          customerId: customer._id,
-        });
       }
     }
   },
