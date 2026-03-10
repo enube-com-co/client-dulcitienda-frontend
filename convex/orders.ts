@@ -1,5 +1,6 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
+import { api } from "./_generated/api";
 
 // Create order
 export const createOrder = mutation({
@@ -42,6 +43,9 @@ export const createOrder = mutation({
     
     const totalAmount = subtotal; // Add tax, shipping later
     
+    // Get customer info
+    const customer = await ctx.db.get(args.customerId);
+    
     // Create order
     const orderId = await ctx.db.insert("orders", {
       orderNumber,
@@ -58,6 +62,17 @@ export const createOrder = mutation({
       whatsappPhone: args.whatsappPhone,
       notes: args.notes,
       createdAt: Date.now(),
+    });
+    
+    // Create notification for new order
+    await ctx.runMutation(api.notifications.createNotification, {
+      type: "new_order",
+      title: "Nuevo pedido recibido",
+      message: `Pedido ${orderNumber} de ${customer?.name || 'Cliente'} por $${totalAmount.toLocaleString()}`,
+      orderId,
+      customerEmail: customer?.email,
+      customerPhone: args.whatsappPhone || customer?.phone,
+      read: false,
     });
     
     // Update inventory
@@ -122,6 +137,8 @@ export const getAllOrders = query({
       .take(100);
   },
 });
+
+// Update order status
 export const updateOrderStatus = mutation({
   args: {
     orderId: v.id("orders"),
@@ -135,6 +152,69 @@ export const updateOrderStatus = mutation({
     ),
   },
   handler: async (ctx, args) => {
+    const order = await ctx.db.get(args.orderId);
+    if (!order) {
+      throw new Error("Order not found");
+    }
+    
+    const oldStatus = order.status;
+    
     await ctx.db.patch(args.orderId, { status: args.status });
+    
+    // Get customer info
+    const customer = await ctx.db.get(order.customerId);
+    
+    // Create notification for status change
+    const statusLabels: Record<string, string> = {
+      pending: "Pendiente",
+      confirmed: "Confirmado",
+      processing: "En proceso",
+      shipped: "Enviado",
+      delivered: "Entregado",
+      cancelled: "Cancelado",
+    };
+    
+    await ctx.runMutation(api.notifications.createNotification, {
+      type: "order_status_change",
+      title: `Pedido ${order.orderNumber} actualizado`,
+      message: `Estado cambiado de ${statusLabels[oldStatus]} a ${statusLabels[args.status]}`,
+      orderId: args.orderId,
+      customerEmail: customer?.email,
+      customerPhone: order.whatsappPhone || customer?.phone,
+      read: false,
+    });
+    
+    // If delivered, release reserved inventory
+    if (args.status === "delivered") {
+      for (const item of order.items) {
+        const inventory = await ctx.db.query("inventory")
+          .withIndex("by_product", (q) => q.eq("productId", item.productId))
+          .first();
+        
+        if (inventory) {
+          await ctx.db.patch(inventory._id, {
+            quantityReserved: Math.max(0, inventory.quantityReserved - item.quantity),
+            lastUpdated: Date.now(),
+          });
+        }
+      }
+    }
+    
+    // If cancelled, return inventory
+    if (args.status === "cancelled") {
+      for (const item of order.items) {
+        const inventory = await ctx.db.query("inventory")
+          .withIndex("by_product", (q) => q.eq("productId", item.productId))
+          .first();
+        
+        if (inventory) {
+          await ctx.db.patch(inventory._id, {
+            quantityAvailable: inventory.quantityAvailable + item.quantity,
+            quantityReserved: Math.max(0, inventory.quantityReserved - item.quantity),
+            lastUpdated: Date.now(),
+          });
+        }
+      }
+    }
   },
 });

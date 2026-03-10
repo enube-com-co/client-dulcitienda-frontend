@@ -178,4 +178,36 @@ export default defineSchema({
     validUntil: v.optional(v.number()),
   })
     .index("by_product_tier", ["productId", "customerTier"]),
+    
+  // Notification Settings (for store owner)
+  notificationSettings: defineTable({
+    email: v.optional(v.string()),
+    whatsappNumber: v.optional(v.string()),
+    emailEnabled: v.boolean(),
+    whatsappEnabled: v.boolean(),
+    webNotificationsEnabled: v.boolean(),
+    notifyOnNewOrder: v.boolean(),
+    notifyOnStatusChange: v.boolean(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  }),
+  
+  // Notifications (for web UI)
+  notifications: defineTable({
+    type: v.union(
+      v.literal("new_order"),
+      v.literal("order_status_change"),
+      v.literal("low_stock"),
+      v.literal("customer_message")
+    ),
+    title: v.string(),
+    message: v.string(),
+    orderId: v.optional(v.id("orders")),
+    customerEmail: v.optional(v.string()),
+    customerPhone: v.optional(v.string()),
+    read: v.boolean(),
+    createdAt: v.number(),
+  })
+    .index("by_read", ["read"])
+    .index("by_order", ["orderId"]),
 });
