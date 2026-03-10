@@ -1,28 +1,34 @@
 "use client";
 
-import { useAuthActions } from "@convex-dev/auth/react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { api } from "@/convex/_generated/api";
-import { useQuery } from "convex/react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { User, Package, MapPin, LogOut, Crown, ChevronRight, Sparkles, Loader2 } from "lucide-react";
+import { User, Package, MapPin, LogOut, Crown, ChevronRight, Sparkles } from "lucide-react";
 import Link from "next/link";
 
 export default function ProfilePage() {
-  const { signOut } = useAuthActions();
   const router = useRouter();
-  const user = useQuery(api.users.getCurrentUser);
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
-  const handleLogout = async () => {
-    await signOut();
+  useEffect(() => {
+    const savedUser = localStorage.getItem("dulcitienda_user");
+    if (savedUser) {
+      setUser(JSON.parse(savedUser));
+    }
+    setLoading(false);
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("dulcitienda_user");
     router.push("/");
   };
 
-  if (user === undefined) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-pink-500" />
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-pink-500 border-t-transparent"></div>
       </div>
     );
   }
@@ -46,55 +52,23 @@ export default function ProfilePage() {
     );
   }
 
-  const role = (user as any).role || "customer";
-  const customerTier = (user as any).customerTier || "bronze";
-
-  const getTierColor = (tier: string) => {
-    switch (tier) {
-      case "platinum": return "text-purple-600";
-      case "gold": return "text-yellow-600";
-      case "silver": return "text-gray-500";
-      default: return "text-amber-700";
-    }
-  };
-
-  const getTierName = (tier: string) => {
-    switch (tier) {
-      case "platinum": return "Platino";
-      case "gold": return "Oro";
-      case "silver": return "Plata";
-      default: return "Bronce";
-    }
-  };
-
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-4xl mx-auto px-4">
         {/* Header */}
         <div className="bg-gradient-to-r from-pink-500 to-yellow-400 rounded-2xl p-8 text-white mb-8">
           <div className="flex items-center gap-4">
-            <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center overflow-hidden">
-              {(user as any).image ? (
-                <img src={(user as any).image} alt={(user as any).name || ""} className="w-full h-full object-cover" />
-              ) : (
-                <User size={40} />
-              )}
+            <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center">
+              <User size={40} />
             </div>
             <div>
-              <h1 className="text-2xl font-bold">{(user as any).name}</h1>
-              <p className="text-white/80">{(user as any).email}</p>
+              <h1 className="text-2xl font-bold">{user.name}</h1>
+              <p className="text-white/80">{user.email}</p>
+              {user.company && <p className="text-white/60 text-sm">{user.company}</p>}
               <div className="flex items-center gap-2 mt-2">
-                <Crown size={16} className={getTierColor(customerTier)} />
-                <span className={`text-sm font-medium ${getTierColor(customerTier)}`}>
-                  Cliente {getTierName(customerTier)}
-                </span>
-              </div>            
-              {role === "admin" && (
-                <div className="flex items-center gap-2 mt-1">
-                  <Sparkles size={14} className="text-yellow-200" />
-                  <span className="text-xs bg-white/20 px-2 py-1 rounded-full">Administrador</span>
-                </div>
-              )}
+                <Crown size={16} className="text-amber-700" />
+                <span className="text-sm font-medium text-amber-700">Cliente Bronce</span>
+              </div>
             </div>
           </div>
         </div>
@@ -128,23 +102,6 @@ export default function ProfilePage() {
             </div>
             <ChevronRight className="text-gray-400" />
           </Card>
-          
-          {role === "admin" && (
-            <Link href="/admin">
-              <Card className="p-4 flex items-center justify-between hover:shadow-md transition-shadow border-pink-200">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
-                    <Sparkles className="text-purple-600" />
-                  </div>
-                  <div>
-                    <h2 className="font-semibold">Panel de Administración</h2>
-                    <p className="text-sm text-gray-500">Gestionar tienda y pedidos</p>
-                  </div>
-                </div>
-                <ChevronRight className="text-gray-400" />
-              </Card>
-            </Link>
-          )}
 
           <Button 
             variant="outline" 

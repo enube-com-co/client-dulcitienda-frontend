@@ -1,10 +1,7 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
-import { authTables } from "@convex-dev/auth/server";
 
 export default defineSchema({
-  // Auth tables from Convex Auth
-  ...authTables,
   // Products (5000+ SKUs)
   products: defineTable({
     sku: v.string(),
@@ -115,9 +112,8 @@ export default defineSchema({
   users: defineTable({
     email: v.string(),
     name: v.string(),
-    googleId: v.optional(v.string()),  // Google OAuth ID
-    photo: v.optional(v.string()),       // Google profile photo
     phone: v.optional(v.string()),
+    company: v.optional(v.string()),
     role: v.union(v.literal("admin"), v.literal("power_user"), v.literal("customer")),
     customerTier: v.optional(v.union(
       v.literal("bronze"), 
@@ -140,7 +136,6 @@ export default defineSchema({
     createdAt: v.number(),
   })
     .index("by_email", ["email"])
-    .index("by_googleId", ["googleId"])
     .index("by_company", ["companyId"]),
 
   // Companies (B2B clients)
