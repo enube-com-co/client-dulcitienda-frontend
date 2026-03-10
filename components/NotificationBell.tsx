@@ -24,7 +24,7 @@ export function NotificationBell() {
   const markAllAsRead = useMutation(api.notifications.markAllAsRead);
 
   const handleMarkAsRead = async (notificationId: string) => {
-    await markAsRead({ notificationId });
+    await markAsRead({ notificationId: notificationId as any });
   };
 
   const handleMarkAllAsRead = async () => {
