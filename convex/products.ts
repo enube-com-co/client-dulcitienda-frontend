@@ -77,3 +77,12 @@ export const getCategories = query({
       .take(100);
   },
 });
+
+// Get product by ID
+export const getById = query({
+  args: { id: v.id("products") },
+  returns: v.any(),
+  handler: async (ctx, args) => {
+    return await ctx.db.get(args.id);
+  },
+});

@@ -83,3 +83,17 @@ export const getById = query({
     return await ctx.db.get(args.userId);
   },
 });
+
+// Get recent users (for notifications)
+export const getRecentUsers = query({
+  args: {
+    since: v.number(),
+  },
+  returns: v.array(v.any()),
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("users")
+      .filter((q) => q.gt(q.field("createdAt"), args.since))
+      .collect();
+  },
+});

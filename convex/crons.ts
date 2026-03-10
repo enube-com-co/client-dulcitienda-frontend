@@ -1,4 +1,4 @@
-import { query, mutation, internalAction } from "./_generated/server";
+import { internalAction } from "./_generated/server";
 import { api } from "./_generated/api";
 import { v } from "convex/values";
 import { cronJobs } from "convex/server";
@@ -30,7 +30,7 @@ export const checkNewEvents = internalAction({
       const newOrders = await ctx.runQuery(api.orders.getRecentOrders, { since: fiveMinutesAgo });
       
       for (const order of newOrders) {
-        const customer = await ctx.db.get(order.customerId);
+        const customer = await ctx.runQuery(api.users.getById, { userId: order.customerId });
         
         // Format items list
         const itemsList = order.items.map((item: any) => 
@@ -67,20 +67,17 @@ export const checkNewEvents = internalAction({
       
       for (const item of lowStockItems) {
         // Check if we already notified about this product recently (last hour)
-        const recentNotifications = await ctx.db
-          .query("notifications")
-          .filter((q) => q.and(
-            q.eq(q.field("type"), "low_stock"),
-            q.gt(q.field("createdAt"), Date.now() - 60 * 60 * 1000)
-          ))
-          .collect();
+        const recentNotifications = await ctx.runQuery(api.notifications.getRecentByType, {
+          type: "low_stock",
+          since: Date.now() - 60 * 60 * 1000,
+        });
         
         const alreadyNotified = recentNotifications.some(
           (n: any) => n.details?.productId === item.productId
         );
         
         if (!alreadyNotified) {
-          const product = await ctx.db.get(item.productId);
+          const product = await ctx.runQuery(api.products.getById, { id: item.productId });
           
           const message = `⚠️ STOCK BAJO\n\n` +
             `Producto: ${product?.name || 'N/A'}\n` +
@@ -108,10 +105,7 @@ export const checkNewEvents = internalAction({
 
     // 3. Check for new customers
     if (settings.notifyOnNewCustomer !== false) {
-      const newCustomers = await ctx.db
-        .query("users")
-        .filter((q) => q.gt(q.field("createdAt"), fiveMinutesAgo))
-        .collect();
+      const newCustomers = await ctx.runQuery(api.users.getRecentUsers, { since: fiveMinutesAgo });
       
       for (const customer of newCustomers) {
         const message = `👤 NUEVO CLIENTE REGISTRADO\n\n` +

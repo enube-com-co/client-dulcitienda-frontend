@@ -33,27 +33,3 @@ export const getByProduct = query({
       .first();
   },
 });
-
-// Update inventory quantity
-export const updateQuantity = query({
-  args: {
-    productId: v.id("products"),
-    quantity: v.number(),
-  },
-  returns: v.null(),
-  handler: async (ctx, args) => {
-    const inventory = await ctx.db
-      .query("inventory")
-      .withIndex("by_product", (q) => q.eq("productId", args.productId))
-      .first();
-    
-    if (inventory) {
-      await ctx.db.patch(inventory._id, {
-        quantityAvailable: args.quantity,
-        lastUpdated: Date.now(),
-      });
-    }
-    
-    return null;
-  },
-});

@@ -131,3 +131,28 @@ export const getUnreadCount = query({
     return notifications.length;
   },
 });
+
+// Get recent notifications by type
+export const getRecentByType = query({
+  args: {
+    type: v.union(
+      v.literal("new_order"),
+      v.literal("order_status_change"),
+      v.literal("low_stock"),
+      v.literal("customer_message")
+    ),
+    since: v.number(),
+  },
+  returns: v.array(v.any()),
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("notifications")
+      .filter((q) =>
+        q.and(
+          q.eq(q.field("type"), args.type),
+          q.gt(q.field("createdAt"), args.since)
+        )
+      )
+      .collect();
+  },
+});
