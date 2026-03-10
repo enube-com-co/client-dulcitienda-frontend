@@ -189,7 +189,6 @@ export default function Home() {
                     )}
                   </div>
                   <div className="p-4">
-                    <p className="text-sm text-gray-500 mb-1">{category.name}</p>
                     <h3 className="font-bold text-gray-900 mb-2 line-clamp-2">{product.name}</h3>
                     <div className="flex items-center justify-between">
                       <span className="text-lg font-bold text-pink-600">${product.basePrice.toLocaleString()}</span>
