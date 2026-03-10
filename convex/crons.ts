@@ -1,4 +1,4 @@
-import { internalAction } from "./_generated/server";
+import { action } from "./_generated/server";
 import { api } from "./_generated/api";
 import { v } from "convex/values";
 import { cronJobs } from "convex/server";
@@ -17,7 +17,7 @@ crons.interval(
 export default crons;
 
 // Check for new events (called by cron)
-export const checkNewEvents = internalAction({
+export const checkNewEvents = action({
   args: {},
   handler: async (ctx) => {
     const fiveMinutesAgo = Date.now() - 5 * 60 * 1000;

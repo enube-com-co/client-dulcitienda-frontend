@@ -217,6 +217,8 @@ export default defineSchema({
     title: v.string(),
     message: v.string(),
     orderId: v.optional(v.id("orders")),
+    productId: v.optional(v.id("products")),
+    customerId: v.optional(v.id("users")),
     customerEmail: v.optional(v.string()),
     customerPhone: v.optional(v.string()),
     read: v.boolean(),
