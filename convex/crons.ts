@@ -1,4 +1,4 @@
-import { internalAction } from "./_generated/server";
+import { internalAction, internalMutation } from "./_generated/server";
 import { api } from "./_generated/api";
 import { v } from "convex/values";
 import { cronJobs } from "convex/server";
@@ -44,7 +44,7 @@ export const checkNewEvents = internalAction({
           `📦 PRODUCTOS:\n${itemsList}\n\n` +
           `💰 TOTAL: $${order.totalAmount.toLocaleString()}`;
 
-        await ctx.runAction(api.crons.sendNotification, {
+        await ctx.runMutation(api.crons.processNotification, {
           type: "new_order",
           title: `Nuevo pedido: ${order.orderNumber}`,
           message,
@@ -86,7 +86,7 @@ export const checkNewEvents = internalAction({
             `Umbral mínimo: 10 unidades\n\n` +
             `📦 Reabastecer urgentemente`;
 
-          await ctx.runAction(api.crons.sendNotification, {
+          await ctx.runMutation(api.crons.processNotification, {
             type: "low_stock",
             title: `Stock bajo: ${product?.name}`,
             message,
@@ -115,7 +115,7 @@ export const checkNewEvents = internalAction({
           `Tel: ${customer.phone || 'No proporcionado'}\n\n` +
           `Tier: ${customer.customerTier || 'Bronce'} (auto-asignado)`;
 
-        await ctx.runAction(api.crons.sendNotification, {
+        await ctx.runMutation(api.crons.processNotification, {
           type: "new_customer",
           title: `Nuevo cliente: ${customer.name}`,
           message,
@@ -133,8 +133,8 @@ export const checkNewEvents = internalAction({
   },
 });
 
-// Send notification (internal function used by cron)
-export const sendNotification = internalAction({
+// Process notification - internal mutation to avoid circular refs
+export const processNotification = internalMutation({
   args: {
     type: v.union(v.literal("new_order"), v.literal("low_stock"), v.literal("new_customer")),
     title: v.string(),
@@ -146,7 +146,7 @@ export const sendNotification = internalAction({
   },
   handler: async (ctx, args) => {
     // Create web notification
-    await ctx.runMutation(api.notifications.createNotification, {
+    await ctx.db.insert("notifications", {
       type: args.type,
       title: args.title,
       message: args.message,
@@ -154,10 +154,11 @@ export const sendNotification = internalAction({
       customerEmail: args.details?.customerEmail,
       customerPhone: args.details?.customerPhone,
       read: false,
+      createdAt: Date.now(),
     });
 
     // Get notification settings
-    const settings = await ctx.runQuery(api.notifications.getSettings);
+    const settings = await ctx.db.query("notificationSettings").first();
     
     if (!settings) return;
 
@@ -176,7 +177,7 @@ export const sendNotification = internalAction({
     }
 
     // Send WhatsApp if enabled
-    if (settings.whatsappEnabled && settings.whatsappNumber && settings.metaApiKey) {
+    if (settings.whatsappEnabled && settings.whatsappNumber && settings.metaApiKey && settings.metaPhoneNumberId) {
       try {
         await sendWhatsAppMeta({
           to: settings.whatsappNumber,

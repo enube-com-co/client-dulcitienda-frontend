@@ -211,7 +211,8 @@ export default defineSchema({
       v.literal("new_order"),
       v.literal("order_status_change"),
       v.literal("low_stock"),
-      v.literal("customer_message")
+      v.literal("customer_message"),
+      v.literal("new_customer")
     ),
     title: v.string(),
     message: v.string(),

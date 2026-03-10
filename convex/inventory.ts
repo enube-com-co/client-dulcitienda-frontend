@@ -25,7 +25,7 @@ export const getByProduct = query({
   args: {
     productId: v.id("products"),
   },
-  returns: v.optional(v.any()),
+  returns: v.any(),
   handler: async (ctx, args) => {
     return await ctx.db
       .query("inventory")
