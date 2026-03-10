@@ -1,4 +1,4 @@
-import { internalAction, internalMutation } from "./_generated/server";
+import { internalAction } from "./_generated/server";
 import { api } from "./_generated/api";
 import { v } from "convex/values";
 import { cronJobs } from "convex/server";
@@ -44,20 +44,44 @@ export const checkNewEvents = internalAction({
           `📦 PRODUCTOS:\n${itemsList}\n\n` +
           `💰 TOTAL: $${order.totalAmount.toLocaleString()}`;
 
-        await ctx.runMutation(api.crons.processNotification, {
+        // Create notification
+        await ctx.runMutation(api.notifications.createNotification, {
           type: "new_order",
           title: `Nuevo pedido: ${order.orderNumber}`,
           message,
-          details: {
-            orderNumber: order.orderNumber,
-            items: order.items,
-            total: order.totalAmount,
-            customerName: customer?.name,
-            customerEmail: customer?.email,
-            customerPhone: customer?.phone || order.whatsappPhone,
-          },
           orderId: order._id,
+          customerEmail: customer?.email,
+          customerPhone: customer?.phone || order.whatsappPhone,
+          read: false,
         });
+
+        // Send email if enabled
+        if (settings.emailEnabled && settings.email && settings.resendApiKey) {
+          try {
+            await sendEmail({
+              to: settings.email,
+              subject: `Nuevo pedido: ${order.orderNumber}`,
+              text: message,
+              apiKey: settings.resendApiKey,
+            });
+          } catch (error) {
+            console.error("Failed to send email:", error);
+          }
+        }
+
+        // Send WhatsApp if enabled
+        if (settings.whatsappEnabled && settings.whatsappNumber && settings.metaApiKey && settings.metaPhoneNumberId) {
+          try {
+            await sendWhatsAppMeta({
+              to: settings.whatsappNumber,
+              message,
+              apiKey: settings.metaApiKey,
+              phoneNumberId: settings.metaPhoneNumberId,
+            });
+          } catch (error) {
+            console.error("Failed to send WhatsApp:", error);
+          }
+        }
       }
     }
 
@@ -73,7 +97,7 @@ export const checkNewEvents = internalAction({
         });
         
         const alreadyNotified = recentNotifications.some(
-          (n: any) => n.details?.productId === item.productId
+          (n: any) => n.productId === item.productId
         );
         
         if (!alreadyNotified) {
@@ -86,19 +110,42 @@ export const checkNewEvents = internalAction({
             `Umbral mínimo: 10 unidades\n\n` +
             `📦 Reabastecer urgentemente`;
 
-          await ctx.runMutation(api.crons.processNotification, {
+          // Create notification
+          await ctx.runMutation(api.notifications.createNotification, {
             type: "low_stock",
             title: `Stock bajo: ${product?.name}`,
             message,
-            details: {
-              productName: product?.name,
-              productSku: product?.sku,
-              currentStock: item.quantityAvailable,
-              threshold: 10,
-              productId: item.productId,
-            },
             productId: item.productId,
+            read: false,
           });
+
+          // Send email if enabled
+          if (settings.emailEnabled && settings.email && settings.resendApiKey) {
+            try {
+              await sendEmail({
+                to: settings.email,
+                subject: `Stock bajo: ${product?.name}`,
+                text: message,
+                apiKey: settings.resendApiKey,
+              });
+            } catch (error) {
+              console.error("Failed to send email:", error);
+            }
+          }
+
+          // Send WhatsApp if enabled
+          if (settings.whatsappEnabled && settings.whatsappNumber && settings.metaApiKey && settings.metaPhoneNumberId) {
+            try {
+              await sendWhatsAppMeta({
+                to: settings.whatsappNumber,
+                message,
+                apiKey: settings.metaApiKey,
+                phoneNumberId: settings.metaPhoneNumberId,
+              });
+            } catch (error) {
+              console.error("Failed to send WhatsApp:", error);
+            }
+          }
         }
       }
     }
@@ -115,78 +162,44 @@ export const checkNewEvents = internalAction({
           `Tel: ${customer.phone || 'No proporcionado'}\n\n` +
           `Tier: ${customer.customerTier || 'Bronce'} (auto-asignado)`;
 
-        await ctx.runMutation(api.crons.processNotification, {
+        // Create notification
+        await ctx.runMutation(api.notifications.createNotification, {
           type: "new_customer",
           title: `Nuevo cliente: ${customer.name}`,
           message,
-          details: {
-            customerName: customer.name,
-            customerEmail: customer.email,
-            customerCompany: customer.company,
-            customerPhone: customer.phone,
-            customerTier: customer.customerTier,
-          },
           customerId: customer._id,
+          customerEmail: customer.email,
+          customerPhone: customer.phone,
+          read: false,
         });
-      }
-    }
-  },
-});
 
-// Process notification - internal mutation to avoid circular refs
-export const processNotification = internalMutation({
-  args: {
-    type: v.union(v.literal("new_order"), v.literal("low_stock"), v.literal("new_customer")),
-    title: v.string(),
-    message: v.string(),
-    details: v.optional(v.any()),
-    orderId: v.optional(v.id("orders")),
-    productId: v.optional(v.id("products")),
-    customerId: v.optional(v.id("users")),
-  },
-  handler: async (ctx, args) => {
-    // Create web notification
-    await ctx.db.insert("notifications", {
-      type: args.type,
-      title: args.title,
-      message: args.message,
-      orderId: args.orderId,
-      customerEmail: args.details?.customerEmail,
-      customerPhone: args.details?.customerPhone,
-      read: false,
-      createdAt: Date.now(),
-    });
+        // Send email if enabled
+        if (settings.emailEnabled && settings.email && settings.resendApiKey) {
+          try {
+            await sendEmail({
+              to: settings.email,
+              subject: `Nuevo cliente: ${customer.name}`,
+              text: message,
+              apiKey: settings.resendApiKey,
+            });
+          } catch (error) {
+            console.error("Failed to send email:", error);
+          }
+        }
 
-    // Get notification settings
-    const settings = await ctx.db.query("notificationSettings").first();
-    
-    if (!settings) return;
-
-    // Send email if enabled
-    if (settings.emailEnabled && settings.email && settings.resendApiKey) {
-      try {
-        await sendEmail({
-          to: settings.email,
-          subject: args.title,
-          text: args.message,
-          apiKey: settings.resendApiKey,
-        });
-      } catch (error) {
-        console.error("Failed to send email:", error);
-      }
-    }
-
-    // Send WhatsApp if enabled
-    if (settings.whatsappEnabled && settings.whatsappNumber && settings.metaApiKey && settings.metaPhoneNumberId) {
-      try {
-        await sendWhatsAppMeta({
-          to: settings.whatsappNumber,
-          message: args.message,
-          apiKey: settings.metaApiKey,
-          phoneNumberId: settings.metaPhoneNumberId,
-        });
-      } catch (error) {
-        console.error("Failed to send WhatsApp:", error);
+        // Send WhatsApp if enabled
+        if (settings.whatsappEnabled && settings.whatsappNumber && settings.metaApiKey && settings.metaPhoneNumberId) {
+          try {
+            await sendWhatsAppMeta({
+              to: settings.whatsappNumber,
+              message,
+              apiKey: settings.metaApiKey,
+              phoneNumberId: settings.metaPhoneNumberId,
+            });
+          } catch (error) {
+            console.error("Failed to send WhatsApp:", error);
+          }
+        }
       }
     }
   },

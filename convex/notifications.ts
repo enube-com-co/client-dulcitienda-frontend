@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
+import { mutation, query, internalMutation } from "./_generated/server";
 
 // Notification settings for the store owner
 export const getSettings = query({
@@ -158,3 +158,72 @@ export const getRecentByType = query({
       .collect();
   },
 });
+
+// Helper: Send email via Resend
+async function sendEmail({ to, subject, text, apiKey }: { 
+  to: string; 
+  subject: string; 
+  text: string; 
+  apiKey: string;
+}) {
+  const response = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      from: 'Dulcitienda <notificaciones@dulcitienda.com>',
+      to,
+      subject,
+      text,
+    }),
+  });
+
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`Resend API error: ${error}`);
+  }
+
+  return await response.json();
+}
+
+// Helper: Send WhatsApp via Meta Business API
+async function sendWhatsAppMeta({ 
+  to, 
+  message, 
+  apiKey,
+  phoneNumberId,
+}: { 
+  to: string; 
+  message: string; 
+  apiKey: string;
+  phoneNumberId: string;
+}) {
+  // Format phone number (remove + and spaces)
+  const formattedPhone = to.replace(/\+/g, '').replace(/\s/g, '');
+  
+  const response = await fetch(`https://graph.facebook.com/v18.0/${phoneNumberId}/messages`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      messaging_product: 'whatsapp',
+      recipient_type: 'individual',
+      to: formattedPhone,
+      type: 'text',
+      text: {
+        body: message,
+      },
+    }),
+  });
+
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`Meta WhatsApp API error: ${error}`);
+  }
+
+  return await response.json();
+}
