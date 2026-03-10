@@ -100,7 +100,28 @@ export const getOrderByNumber = query({
   },
 });
 
-// Update order status
+// Get recent orders (for notifications)
+export const getRecentOrders = query({
+  args: { 
+    since: v.number(), // timestamp
+  },
+  handler: async (ctx, args) => {
+    return await ctx.db.query("orders")
+      .filter((q) => q.gt(q.field("createdAt"), args.since))
+      .order("desc")
+      .take(10);
+  },
+});
+
+// Get all orders (for admin)
+export const getAllOrders = query({
+  args: {},
+  handler: async (ctx) => {
+    return await ctx.db.query("orders")
+      .order("desc")
+      .take(100);
+  },
+});
 export const updateOrderStatus = mutation({
   args: {
     orderId: v.id("orders"),

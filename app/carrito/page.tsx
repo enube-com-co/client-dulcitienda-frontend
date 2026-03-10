@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useMutation, useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
 import Link from "next/link";
 import { 
   ShoppingCart, 
@@ -9,9 +11,9 @@ import {
   Minus, 
   ChevronRight,
   Phone,
-  X,
   ArrowLeft,
-  Package
+  Loader2,
+  CheckCircle
 } from "lucide-react";
 import { validateCartItem } from "@/lib/validation";
 
@@ -27,31 +29,45 @@ interface CartItem {
 export default function CarritoPage() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [mounted, setMounted] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [user, setUser] = useState<any>(null);
+  const [creatingOrder, setCreatingOrder] = useState(false);
+  const [orderCreated, setOrderCreated] = useState(false);
+  
+  // Convex mutations
+  const createOrder = useMutation(api.orders.createOrder);
   
   useEffect(() => {
     setMounted(true);
-    const saved = localStorage.getItem('dulcitienda-cart');
-    if (saved) {
+    const savedCart = localStorage.getItem('dulcitienda-cart');
+    const savedUser = localStorage.getItem('dulcitienda_user');
+    
+    if (savedCart) {
       try {
-        const parsed = JSON.parse(saved);
-        // Validate cart items
+        const parsed = JSON.parse(savedCart);
         if (Array.isArray(parsed)) {
           const validItems = parsed.filter(item => {
             const validation = validateCartItem(item);
             return validation.valid;
           });
           setCart(validItems);
-          // Save filtered cart back to localStorage
           localStorage.setItem('dulcitienda-cart', JSON.stringify(validItems));
         }
       } catch {
-        // Invalid JSON, clear cart
         localStorage.removeItem('dulcitienda-cart');
         setCart([]);
       }
     }
+    
+    if (savedUser) {
+      setUser(JSON.parse(savedUser));
+    }
   }, []);
+  
+  // Get user from Convex
+  const convexUser = useQuery(
+    api.users.getByEmail,
+    user?.email ? { email: user.email } : "skip"
+  );
   
   const updateQuantity = (productId: string, delta: number) => {
     setCart(prev => {
@@ -80,6 +96,69 @@ export default function CarritoPage() {
     localStorage.removeItem('dulcitienda-cart');
   };
   
+  const handleCheckout = async () => {
+    setCreatingOrder(true);
+    
+    try {
+      // Prepare order items
+      const orderItems = cart.map(item => ({
+        productId: item.productId as any,
+        sku: item.sku,
+        name: item.name,
+        quantity: item.quantity,
+        unitPrice: item.price,
+      }));
+      
+      // Create order in Convex (if user is logged in)
+      if (convexUser?._id) {
+        const result = await createOrder({
+          customerId: convexUser._id,
+          items: orderItems,
+          shippingAddress: {
+            name: user?.name || "Cliente",
+            street: "Por confirmar",
+            city: "Neiva",
+            state: "Huila",
+            zip: "410001",
+          },
+          whatsappPhone: user?.phone,
+          notes: `Pedido desde carrito - Cliente: ${user?.name || 'Sin registrar'}`,
+        });
+        
+        console.log("Order created:", result);
+      }
+      
+      setOrderCreated(true);
+      
+      // Clear cart after order is created
+      clearCart();
+      
+      // Redirect to WhatsApp after a short delay
+      setTimeout(() => {
+        const message = encodeURIComponent(
+          `¡Hola! Quiero hacer un pedido en Dulcitienda:\n\n` +
+          cart.map((item, i) => `${i + 1}. ${item.name}\n   SKU: ${item.sku}\n   Cantidad: ${item.quantity} unidades\n   Precio unitario: $${item.price.toLocaleString()}\n   Subtotal: $${(item.price * item.quantity).toLocaleString()}`).join('\n\n') +
+          `\n\n--------------------------------\n` +
+          `Subtotal: $${subtotal.toLocaleString()}\n` +
+          `Envío: ${shipping === 0 ? 'GRATIS' : '$' + shipping.toLocaleString()}\n` +
+          `*TOTAL: $${total.toLocaleString()}*\n\n` +
+          `Cliente: ${user?.name || 'Sin registrar'}\n` +
+          `Email: ${user?.email || 'No proporcionado'}\n` +
+          `${user?.phone ? `Tel: ${user.phone}\n` : ''}` +
+          `\nPor favor confirmar disponibilidad y método de pago. ¡Gracias!`
+        );
+        
+        window.open(`https://wa.me/573132309867?text=${message}`, '_blank');
+      }, 1500);
+      
+    } catch (error) {
+      console.error("Error creating order:", error);
+      alert("Error al crear el pedido. Intenta de nuevo.");
+    } finally {
+      setCreatingOrder(false);
+    }
+  };
+  
   const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   const shipping = subtotal > 200000 ? 0 : 15000;
   const total = subtotal + shipping;
@@ -101,7 +180,7 @@ export default function CarritoPage() {
           <p>🚚 Envío gratis en Neiva en pedidos mayores a $200.000</p>
           <div className="hidden md:flex items-center gap-6">
             <a href="tel:+573132309867" className="flex items-center gap-2 hover:text-pink-200">
-              <Phone size={14} /> +57 320 355 5663
+              <Phone size={14} /> +57 313 2309867
             </a>
           </div>
         </div>
@@ -145,20 +224,39 @@ export default function CarritoPage() {
       </div>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <h1 className="text-3xl font-bold text-gray-800 mb-8">Carrito de compras ({itemCount} items)</h1>
+        <h1 className="text-3xl font-bold text-gray-800 mb-8">
+          Carrito de compras ({itemCount} items)
+        </h1>
         
         {cart.length === 0 ? (
           <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-12 text-center">
-            <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <ShoppingCart size={40} className="text-gray-400" />
-            </div>
-            <h2 className="text-2xl font-bold text-gray-800 mb-2">Tu carrito está vacío</h2>
-            <p className="text-gray-500 mb-6">¡Agrega algunos productos para comenzar tu pedido!</p>
-            <Link href="/catalogo">
-              <button className="px-8 py-4 bg-pink-500 text-white rounded-full font-bold hover:bg-gradient-to-r from-pink-600 via-pink-500 to-yellow-400 transition-colors">
-                Ver catálogo
-              </button>
-            </Link>
+            {orderCreated ? (
+              <>
+                <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <CheckCircle size={40} className="text-green-500" />
+                </div>
+                <h2 className="text-2xl font-bold text-gray-800 mb-2">¡Pedido creado exitosamente!</h2>
+                <p className="text-gray-500 mb-6">Hemos abierto WhatsApp para que confirmes tu pedido.</p>
+                <Link href="/pedidos">
+                  <button className="px-8 py-4 bg-pink-500 text-white rounded-full font-bold hover:bg-gradient-to-r from-pink-600 via-pink-500 to-yellow-400 transition-colors">
+                    Ver mis pedidos
+                  </button>
+                </Link>
+              </>
+            ) : (
+              <>
+                <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <ShoppingCart size={40} className="text-gray-400" />
+                </div>
+                <h2 className="text-2xl font-bold text-gray-800 mb-2">Tu carrito está vacío</h2>
+                <p className="text-gray-500 mb-6">¡Agrega algunos productos para comenzar tu pedido!</p>
+                <Link href="/catalogo">
+                  <button className="px-8 py-4 bg-pink-500 text-white rounded-full font-bold hover:bg-gradient-to-r from-pink-600 via-pink-500 to-yellow-400 transition-colors">
+                    Ver catálogo
+                  </button>
+                </Link>
+              </>
+            )}
           </div>
         ) : (
           <div className="grid lg:grid-cols-3 gap-8">
@@ -260,25 +358,35 @@ export default function CarritoPage() {
                   </div>
                 </div>
                 
-                <a href={`https://wa.me/573132309867?text=${encodeURIComponent(
-                  `¡Hola! Quiero hacer un pedido en Dulcitienda:\n\n` +
-                  cart.map((item, i) => `${i + 1}. ${item.name}\n   SKU: ${item.sku}\n   Cantidad: ${item.quantity} unidades\n   Precio unitario: $${item.price.toLocaleString()}\n   Subtotal: $${(item.price * item.quantity).toLocaleString()}`).join('\n\n') +
-                  `\n\n--------------------------------\n` +
-                  `Subtotal: $${subtotal.toLocaleString()}\n` +
-                  `Envío: ${shipping === 0 ? 'GRATIS' : '$' + shipping.toLocaleString()}\n` +
-                  `*TOTAL: $${total.toLocaleString()}*\n\n` +
-                  `Por favor confirmar disponibilidad y método de pago. ¡Gracias!`
-                )}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <button className="w-full py-4 bg-green-500 text-white rounded-xl font-bold text-lg hover:bg-green-600 transition-colors flex items-center justify-center gap-2">
-                    💬 Enviar pedido por WhatsApp
-                  </button>
-                </a>
+                {!user && (
+                  <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-4">
+                    <p className="text-sm text-amber-800">
+                      💡 <Link href="/login" className="font-medium underline">Inicia sesión</Link> para guardar tu historial de pedidos
+                    </p>
+                  </div>
+                )}
                 
+                <button 
+                  onClick={handleCheckout}
+                  disabled={creatingOrder}
+                  className="w-full py-4 bg-green-500 text-white rounded-xl font-bold text-lg hover:bg-green-600 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                >
+                  {creatingOrder ? (
+                    <>
+                      <Loader2 size={20} className="animate-spin" />
+                      Creando pedido...
+                    </>
+                  ) : (
+                    <>
+                      💬 Enviar pedido por WhatsApp
+                    </>
+                  )}
+                </button>
                 <p className="text-center text-sm text-gray-500 mt-4">
-                  Te redirigiremos a WhatsApp para confirmar tu pedido
+                  {user 
+                    ? "Tu pedido se guardará en tu historial" 
+                    : "Te redirigiremos a WhatsApp para confirmar tu pedido"
+                  }
                 </p>
               </div>
             </div>
