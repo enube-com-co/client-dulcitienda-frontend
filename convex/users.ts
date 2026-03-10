@@ -60,7 +60,7 @@ export const getByEmail = query({
   args: {
     email: v.string(),
   },
-  returns: v.optional(v.any()),
+  returns: v.any(),
   handler: async (ctx, args) => {
     const normalizedEmail = args.email.toLowerCase().trim();
     
@@ -78,7 +78,7 @@ export const getById = query({
   args: {
     userId: v.id("users"),
   },
-  returns: v.optional(v.any()),
+  returns: v.any(),
   handler: async (ctx, args) => {
     return await ctx.db.get(args.userId);
   },
