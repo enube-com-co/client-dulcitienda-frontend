@@ -181,13 +181,26 @@ export default defineSchema({
     
   // Notification Settings (for store owner)
   notificationSettings: defineTable({
+    // Email (Resend)
     email: v.optional(v.string()),
-    whatsappNumber: v.optional(v.string()),
+    resendApiKey: v.optional(v.string()),
     emailEnabled: v.boolean(),
+    
+    // WhatsApp (Meta Business API)
+    whatsappNumber: v.optional(v.string()),
+    metaApiKey: v.optional(v.string()),
+    metaPhoneNumberId: v.optional(v.string()),
     whatsappEnabled: v.boolean(),
+    
+    // Web
     webNotificationsEnabled: v.boolean(),
+    
+    // Events
     notifyOnNewOrder: v.boolean(),
     notifyOnStatusChange: v.boolean(),
+    notifyOnLowStock: v.boolean(),
+    notifyOnNewCustomer: v.boolean(),
+    
     createdAt: v.number(),
     updatedAt: v.number(),
   }),

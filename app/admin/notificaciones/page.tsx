@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
-import { Bell, Mail, MessageCircle, BellRing, ArrowLeft, Save, Loader2 } from "lucide-react";
+import { Bell, Mail, MessageCircle, BellRing, ArrowLeft, Save, Loader2, Key, Package, Users } from "lucide-react";
 import Link from "next/link";
 
 export default function NotificationSettingsPage() {
@@ -16,12 +16,17 @@ export default function NotificationSettingsPage() {
   
   const [formData, setFormData] = useState({
     email: "",
+    resendApiKey: "",
     whatsappNumber: "",
+    metaApiKey: "",
+    metaPhoneNumberId: "",
     emailEnabled: false,
     whatsappEnabled: false,
     webNotificationsEnabled: true,
     notifyOnNewOrder: true,
     notifyOnStatusChange: true,
+    notifyOnLowStock: true,
+    notifyOnNewCustomer: true,
   });
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -30,12 +35,17 @@ export default function NotificationSettingsPage() {
     if (settings) {
       setFormData({
         email: settings.email || "",
+        resendApiKey: settings.resendApiKey || "",
         whatsappNumber: settings.whatsappNumber || "",
+        metaApiKey: settings.metaApiKey || "",
+        metaPhoneNumberId: settings.metaPhoneNumberId || "",
         emailEnabled: settings.emailEnabled || false,
         whatsappEnabled: settings.whatsappEnabled || false,
         webNotificationsEnabled: settings.webNotificationsEnabled ?? true,
         notifyOnNewOrder: settings.notifyOnNewOrder ?? true,
         notifyOnStatusChange: settings.notifyOnStatusChange ?? true,
+        notifyOnLowStock: settings.notifyOnLowStock ?? true,
+        notifyOnNewCustomer: settings.notifyOnNewCustomer ?? true,
       });
     }
   }, [settings]);
@@ -100,7 +110,7 @@ export default function NotificationSettingsPage() {
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <h2 className="text-lg font-semibold">Notificaciones por Email</h2>
-                  <p className="text-gray-500">Recibe alertas en tu correo electrónico</p>
+                  <p className="text-gray-500">Recibe alertas en tu correo electrónico vía Resend (100 gratis/día)</p>
                 </div>
                 <Switch
                   checked={formData.emailEnabled}
@@ -111,17 +121,34 @@ export default function NotificationSettingsPage() {
               </div>
               
               {formData.emailEnabled && (
-                <div className="mt-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Email donde recibirás las notificaciones *
-                  </label>
-                  <Input
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    placeholder="tu@email.com"
-                    className="max-w-md"
-                  />
+                <div className="space-y-4 mt-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Email donde recibirás las notificaciones *
+                    </label>
+                    <Input
+                      type="email"
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      placeholder="tu@email.com"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                      <Key size={16} />
+                      Resend API Key *
+                    </label>
+                    <Input
+                      type="password"
+                      value={formData.resendApiKey}
+                      onChange={(e) => setFormData({ ...formData, resendApiKey: e.target.value })}
+                      placeholder="re_xxxxxxxxxxxxxxxxxxxxxx"
+                    />
+                    <p className="text-sm text-gray-500 mt-1">
+                      Obtén tu API key en <a href="https://resend.com" target="_blank" className="text-blue-600 underline">resend.com</a> (gratis 100 emails/día)
+                    </p>
+                  </div>
                 </div>
               )}
             </div>
@@ -138,7 +165,7 @@ export default function NotificationSettingsPage() {
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <h2 className="text-lg font-semibold">Notificaciones por WhatsApp</h2>
-                  <p className="text-gray-500">Recibe alertas en tu número de WhatsApp</p>
+                  <p className="text-gray-500">Recibe alertas en tu número de WhatsApp vía Meta Business API</p>
                 </div>
                 <Switch
                   checked={formData.whatsappEnabled}
@@ -149,20 +176,52 @@ export default function NotificationSettingsPage() {
               </div>
               
               {formData.whatsappEnabled && (
-                <div className="mt-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Número de WhatsApp donde recibirás las notificaciones *
-                  </label>
-                  <Input
-                    type="tel"
-                    value={formData.whatsappNumber}
-                    onChange={(e) => setFormData({ ...formData, whatsappNumber: e.target.value })}
-                    placeholder="+57 313 230 9867"
-                    className="max-w-md"
-                  />
-                  <p className="text-sm text-gray-500 mt-2">
-                    Incluye el código de país (+57 para Colombia)
-                  </p>
+                <div className="space-y-4 mt-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Tu número de WhatsApp (destino) *
+                    </label>
+                    <Input
+                      type="tel"
+                      value={formData.whatsappNumber}
+                      onChange={(e) => setFormData({ ...formData, whatsappNumber: e.target.value })}
+                      placeholder="+57 313 230 9867"
+                    />
+                    <p className="text-sm text-gray-500 mt-1">
+                      Incluye el código de país (+57 para Colombia)
+                    </p>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                      <Key size={16} />
+                      Meta API Key (Access Token) *
+                    </label>
+                    <Input
+                      type="password"
+                      value={formData.metaApiKey}
+                      onChange={(e) => setFormData({ ...formData, metaApiKey: e.target.value })}
+                      placeholder="EAAXXXXXXXXXXXXX"
+                    />
+                    <p className="text-sm text-gray-500 mt-1">
+                      Obtén tu token en <a href="https://developers.facebook.com" target="_blank" className="text-blue-600 underline">developers.facebook.com</a>
+                    </p>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Meta Phone Number ID *
+                    </label>
+                    <Input
+                      type="text"
+                      value={formData.metaPhoneNumberId}
+                      onChange={(e) => setFormData({ ...formData, metaPhoneNumberId: e.target.value })}
+                      placeholder="123456789012345"
+                    />
+                    <p className="text-sm text-gray-500 mt-1">
+                      ID del número de teléfono emisor en Meta Business
+                    </p>
+                  </div>
                 </div>
               )}
             </div>
@@ -180,9 +239,14 @@ export default function NotificationSettingsPage() {
               
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium">Nuevo pedido recibido</p>
-                    <p className="text-sm text-gray-500">Cuando un cliente completa una compra</p>
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center">
+                      <Package size={16} className="text-amber-600" />
+                    </div>
+                    <div>
+                      <p className="font-medium">Nuevo pedido recibido</p>
+                      <p className="text-sm text-gray-500">Incluye lista de productos</p>
+                    </div>
                   </div>
                   <Switch
                     checked={formData.notifyOnNewOrder}
@@ -193,14 +257,55 @@ export default function NotificationSettingsPage() {
                 </div>
                 
                 <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium">Cambio de estado de pedido</p>
-                    <p className="text-sm text-gray-500">Cuando actualizas el estado de un pedido</p>
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                      <Bell size={16} className="text-green-600" />
+                    </div>
+                    <div>
+                      <p className="font-medium">Cambio de estado de pedido</p>
+                      <p className="text-sm text-gray-500">Cuando actualizas el estado</p>
+                    </div>
                   </div>
                   <Switch
                     checked={formData.notifyOnStatusChange}
                     onCheckedChange={(checked) => 
                       setFormData({ ...formData, notifyOnStatusChange: checked })
+                    }
+                  />
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
+                      <Package size={16} className="text-red-600" />
+                    </div>
+                    <div>
+                      <p className="font-medium">Stock bajo</p>
+                      <p className="text-sm text-gray-500">Cuando hay menos de 10 unidades</p>
+                    </div>
+                  </div>
+                  <Switch
+                    checked={formData.notifyOnLowStock}
+                    onCheckedChange={(checked) => 
+                      setFormData({ ...formData, notifyOnLowStock: checked })
+                    }
+                  />
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                      <Users size={16} className="text-blue-600" />
+                    </div>
+                    <div>
+                      <p className="font-medium">Nuevo cliente registrado</p>
+                      <p className="text-sm text-gray-500">Datos del cliente nuevo</p>
+                    </div>
+                  </div>
+                  <Switch
+                    checked={formData.notifyOnNewCustomer}
+                    onCheckedChange={(checked) => 
+                      setFormData({ ...formData, notifyOnNewCustomer: checked })
                     }
                   />
                 </div>

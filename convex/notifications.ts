@@ -15,12 +15,17 @@ export const getSettings = query({
 export const updateSettings = mutation({
   args: {
     email: v.optional(v.string()),
+    resendApiKey: v.optional(v.string()),
     whatsappNumber: v.optional(v.string()),
+    metaApiKey: v.optional(v.string()),
+    metaPhoneNumberId: v.optional(v.string()),
     emailEnabled: v.boolean(),
     whatsappEnabled: v.boolean(),
     webNotificationsEnabled: v.boolean(),
     notifyOnNewOrder: v.boolean(),
     notifyOnStatusChange: v.boolean(),
+    notifyOnLowStock: v.boolean(),
+    notifyOnNewCustomer: v.boolean(),
   },
   returns: v.id("notificationSettings"),
   handler: async (ctx, args) => {
