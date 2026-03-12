@@ -13,6 +13,7 @@ import type * as inventory from "../inventory.js";
 import type * as notifications from "../notifications.js";
 import type * as orders from "../orders.js";
 import type * as products from "../products.js";
+import type * as promotions from "../promotions.js";
 import type * as seed from "../seed.js";
 import type * as seedMassive from "../seedMassive.js";
 import type * as users from "../users.js";
@@ -29,6 +30,7 @@ declare const fullApi: ApiFromModules<{
   notifications: typeof notifications;
   orders: typeof orders;
   products: typeof products;
+  promotions: typeof promotions;
   seed: typeof seed;
   seedMassive: typeof seedMassive;
   users: typeof users;

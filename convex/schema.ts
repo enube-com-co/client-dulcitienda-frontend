@@ -226,4 +226,54 @@ export default defineSchema({
   })
     .index("by_read", ["read"])
     .index("by_order", ["orderId"]),
+
+  // Promotions / Discount Codes
+  promotions: defineTable({
+    code: v.string(),
+    name: v.string(),
+    description: v.string(),
+    type: v.union(
+      v.literal("PERCENTAGE"),
+      v.literal("FIXED_AMOUNT"),
+      v.literal("FREE_SHIPPING")
+    ),
+    scope: v.union(
+      v.literal("GLOBAL"),
+      v.literal("CATEGORY"),
+      v.literal("PRODUCT"),
+      v.literal("USER")
+    ),
+    value: v.number(),
+    maxDiscount: v.optional(v.number()),
+    minPurchase: v.optional(v.number()),
+    applicableCategories: v.optional(v.array(v.id("categories"))),
+    applicableProducts: v.optional(v.array(v.string())), // SKUs
+    applicableUsers: v.optional(v.array(v.id("users"))),
+    excludedProducts: v.optional(v.array(v.string())), // SKUs
+    startDate: v.number(), // timestamp
+    endDate: v.number(), // timestamp
+    usageLimit: v.optional(v.number()),
+    usageCount: v.number(),
+    perUserLimit: v.optional(v.number()),
+    isActive: v.boolean(),
+    isExclusive: v.boolean(),
+    priority: v.number(),
+    createdBy: v.id("users"),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_code", ["code"])
+    .index("by_active", ["isActive"])
+    .index("by_date", ["startDate", "endDate"]),
+
+  // Promotion Usage (tracking per user)
+  promotionUsages: defineTable({
+    promotionId: v.id("promotions"),
+    userId: v.id("users"),
+    orderId: v.id("orders"),
+    discountAmount: v.number(),
+    usedAt: v.number(),
+  })
+    .index("by_promotion_user", ["promotionId", "userId"])
+    .index("by_user", ["userId"]),
 });
