@@ -4,17 +4,22 @@ import { useEffect, useState } from "react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import Link from "next/link";
-import {
-  Phone,
-  ChevronRight,
-  Truck,
-  Shield,
-  Clock,
-  Star,
-  ArrowRight,
-  DollarSign,
-} from "lucide-react";
-import { ProductCard, ProductCardSkeleton } from "@/components/ProductCard";
+import { motion } from "framer-motion";
+import { Phone, ArrowRight } from "lucide-react";
+import { CandyCard, CandyCardSkeleton } from "@/components/CandyCard";
+import { CategoryShelf } from "@/components/CategoryShelf";
+import { FloatingProducts } from "@/components/FloatingProducts";
+import { ScrollReveal } from "@/components/ScrollReveal";
+import { WaveDivider } from "@/components/WaveDivider";
+
+const container = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.1 } },
+};
+const item = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
+};
 
 export default function Home() {
   const [mounted, setMounted] = useState(false);
@@ -29,76 +34,119 @@ export default function Home() {
   const showLoading =
     !mounted || products === undefined || categories === undefined;
 
+  if (showLoading) {
+    return (
+      <div className="text-center py-20">
+        <div className="text-4xl animate-spin inline-block">🍬</div>
+        <p className="font-handwritten text-[#1E1012]/60 mt-2 text-xl">
+          Cargando cositas ricas...
+        </p>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-white flex flex-col">
-      {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-pink-600 via-pink-500 to-yellow-400 text-white overflow-hidden">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2260%22%20height%3D%2260%22%20viewBox%3D%220%200%2060%2060%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Cg%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.05%22%3E%3Cpath%20d%3D%22M36%2034v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6%2034v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6%204V0H4v4H0v2h4v4h2V6h4V4H6z%22/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-50"></div>
-
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-20 lg:py-24 relative">
-          <div className="max-w-2xl">
-            <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-4 py-1.5 text-sm font-medium mb-6">
-              <Star className="w-4 h-4 text-yellow-300" />
-              Más de 550 productos disponibles
-            </div>
-
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black leading-tight mb-4">
-              La distribuidora #1 de dulces y licores en{" "}
-              <span className="text-yellow-300">Neiva</span>
-            </h2>
-
-            <p className="text-lg sm:text-xl text-white/90 mb-8 leading-relaxed">
-              Precios mayoristas, envío gratis en la ciudad y atención
-              personalizada para tu negocio.
-            </p>
-
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-              <Link
-                href="/catalogo"
-                className="inline-flex items-center justify-center gap-2 bg-white text-pink-600 font-bold px-6 py-3.5 rounded-xl hover:bg-gray-100 transition-colors shadow-lg"
+    <div className="min-h-screen flex flex-col">
+      {/* Section 1: Hero — Split Personality */}
+      <section className="bg-[#FFFBF0]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 lg:py-24">
+          <div className="grid md:grid-cols-2 gap-10 items-center">
+            {/* Left column — Typography stack */}
+            <motion.div
+              variants={container}
+              initial="hidden"
+              animate="visible"
+              className="flex flex-col gap-1"
+            >
+              <motion.span
+                variants={item}
+                className="text-5xl lg:text-7xl font-display font-bold text-[#7C3AED]"
               >
-                Ver catálogo
-                <ArrowRight className="w-5 h-5" />
-              </Link>
-
-              <a
-                href="https://wa.me/573132309867"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2 bg-white/10 backdrop-blur-sm text-white font-semibold px-6 py-3.5 rounded-xl hover:bg-white/20 transition-colors border border-white/20"
+                Dulces,
+              </motion.span>
+              <motion.span
+                variants={item}
+                className="text-5xl lg:text-7xl font-display font-bold text-[#FF2D78]"
               >
-                <Phone className="w-5 h-5" />
-                Hablar por WhatsApp
-              </a>
-            </div>
+                licores
+              </motion.span>
+              <motion.span
+                variants={item}
+                className="text-xl lg:text-2xl text-[#1E1012]"
+              >
+                y todo lo que
+              </motion.span>
+              <motion.span
+                variants={item}
+                className="text-xl lg:text-2xl text-[#1E1012]"
+              >
+                tu negocio
+              </motion.span>
+              <motion.span
+                variants={item}
+                className="text-5xl lg:text-7xl font-handwritten text-[#34D399]"
+              >
+                necesita.
+              </motion.span>
 
-            {/* Trust badges */}
-            <div className="flex flex-wrap items-center gap-4 sm:gap-6 mt-8 text-sm text-white/80">
-              <div className="flex items-center gap-2">
-                <Truck className="w-4 h-4" />
-                <span>Envío gratis +$200k</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Shield className="w-4 h-4" />
-                <span>Garantía de calidad</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4" />
-                <span>Entrega 24-48h</span>
-              </div>
+              <motion.div
+                variants={item}
+                className="flex flex-col sm:flex-row gap-3 mt-6"
+              >
+                <Link
+                  href="/catalogo"
+                  className="inline-flex items-center justify-center gap-2 bg-[#FF2D78] text-white px-6 py-3.5 rounded-full font-bold hover:brightness-110 transition-all"
+                >
+                  Ver catálogo
+                  <ArrowRight className="w-5 h-5" />
+                </Link>
+
+                <a
+                  href="https://wa.me/573132309867"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-2 border-2 border-[#1E1012] text-[#1E1012] px-6 py-3.5 rounded-full font-semibold hover:bg-[#1E1012] hover:text-white transition-all"
+                >
+                  <Phone className="w-5 h-5" />
+                  Pedir por WhatsApp
+                </a>
+              </motion.div>
+
+              <motion.p
+                variants={item}
+                className="text-sm text-[#1E1012]/60 mt-3"
+              >
+                Envío gratis en Neiva. Sí, en serio.
+              </motion.p>
+            </motion.div>
+
+            {/* Right column — Floating products */}
+            <div className="hidden md:block">
+              <FloatingProducts products={products?.slice(0, 5) || []} />
             </div>
           </div>
         </div>
       </section>
 
-      {/* Categories */}
-      <section className="py-12 sm:py-16 bg-gray-50">
+      {/* Section 2: WaveDivider */}
+      <WaveDivider color="#FFFBF0" />
+
+      {/* Section 3: Categories */}
+      <section className="py-12 sm:py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6 sm:mb-8">
+          <h2 className="text-3xl font-display font-bold text-[#1E1012] mb-6 sm:mb-8">
             Explora por categoría
           </h2>
 
-          {showLoading ? (
+          {categories ? (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
+              {categories.map((cat, i) => (
+                <ScrollReveal key={cat._id} delay={i * 0.1}>
+                  <CategoryShelf category={cat} />
+                </ScrollReveal>
+              ))}
+            </div>
+          ) : (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
               {[...Array(4)].map((_, i) => (
                 <div
@@ -107,161 +155,85 @@ export default function Home() {
                 />
               ))}
             </div>
-          ) : (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
-              {categories?.map((category) => {
-                const categoryIcons: Record<string, string> = {
-                  gaseosas: "🥤",
-                  snacks: "🍿",
-                  dulces: "🍬",
-                  licores: "🍷",
-                };
-
-                const categoryColors: Record<string, string> = {
-                  gaseosas: "from-red-500 to-pink-600",
-                  snacks: "from-yellow-400 to-orange-500",
-                  dulces: "from-pink-400 to-pink-600",
-                  licores: "from-purple-500 to-pink-600",
-                };
-
-                return (
-                  <Link
-                    key={category._id}
-                    href={`/catalogo?categoria=${category.slug}`}
-                    className="group"
-                  >
-                    <div
-                      className={`h-28 sm:h-32 bg-gradient-to-br ${categoryColors[category.slug] || "from-pink-500 to-purple-600"} rounded-2xl flex flex-col items-center justify-center text-white shadow-lg group-hover:shadow-xl group-hover:scale-[1.02] transition-all duration-300`}
-                    >
-                      <span className="text-3xl sm:text-4xl mb-1 sm:mb-2">
-                        {categoryIcons[category.slug] || "🍬"}
-                      </span>
-                      <span className="font-bold capitalize text-sm sm:text-base">
-                        {category.name}
-                      </span>
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
           )}
         </div>
       </section>
 
-      {/* Featured Products */}
+      {/* Section 4: WaveDivider (flip) */}
+      <WaveDivider flip />
+
+      {/* Section 5: Featured Products */}
       <section className="py-12 sm:py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between mb-6 sm:mb-8">
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900">
-                Productos Destacados
-              </h2>
-              <p className="text-gray-500 text-sm mt-1">
-                Los más populares entre nuestros clientes
-              </p>
-            </div>
+            <h2 className="font-handwritten text-3xl text-[#1E1012]">
+              Lo que se está llevando la gente
+            </h2>
             <Link
               href="/catalogo"
-              className="text-pink-600 hover:text-pink-700 font-medium flex items-center gap-1 text-sm sm:text-base"
+              className="text-[#7C3AED] font-medium flex items-center gap-1"
             >
-              Ver todos <ChevronRight size={18} />
+              Ver todos
+              <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
 
-          {showLoading ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-              {[...Array(8)].map((_, i) => (
-                <ProductCardSkeleton key={i} />
-              ))}
-            </div>
+          {products ? (
+            <>
+              {/* Desktop: 4-column grid */}
+              <div className="hidden md:grid grid-cols-4 gap-6">
+                {products.map((p, i) => (
+                  <ScrollReveal key={p._id} delay={i * 0.1}>
+                    <CandyCard product={p} priority={i < 4} />
+                  </ScrollReveal>
+                ))}
+              </div>
+
+              {/* Mobile: Horizontal scroll with snap */}
+              <div className="md:hidden flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide">
+                {products.map((p, i) => (
+                  <div key={p._id} className="snap-start shrink-0 w-[70vw]">
+                    <CandyCard product={p} priority={i < 4} />
+                  </div>
+                ))}
+              </div>
+            </>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-              {products?.map((product, index) => (
-                <ProductCard
-                  key={product._id}
-                  product={product}
-                  priority={index < 4}
-                />
+              {[...Array(8)].map((_, i) => (
+                <CandyCardSkeleton key={i} />
               ))}
             </div>
           )}
         </div>
       </section>
 
-      {/* Value Proposition */}
-      <section className="py-12 sm:py-16 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-8 sm:mb-12">
-            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">
-              ¿Por qué elegir Dulcitienda?
-            </h2>
-            <p className="text-gray-500 max-w-2xl mx-auto">
-              Somos tu aliado estratégico para abastecer tu negocio con los
-              mejores productos al mejor precio.
+      {/* Section 6: Social Proof Banner */}
+      <section className="py-16 bg-[#34D399]/10">
+        <div className="max-w-4xl mx-auto px-4 text-center">
+          <ScrollReveal>
+            <p className="text-3xl lg:text-5xl font-handwritten text-[#1E1012]">
+              200+ negocios en Neiva ya compran aquí. Falta el tuyo.
             </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[
-              {
-                icon: Truck,
-                title: "Envío Rápido",
-                desc: "Gratis en Neiva por compras mayores a $200.000",
-              },
-              {
-                icon: DollarSign,
-                title: "Precios Bajos",
-                desc: "Precios mayoristas que maximizan tu margen",
-              },
-              {
-                icon: Phone,
-                title: "Soporte 24/7",
-                desc: "Atención personalizada vía WhatsApp",
-              },
-              {
-                icon: Star,
-                title: "Calidad Garantizada",
-                desc: "Productos 100% originales y en perfecto estado",
-              },
-            ].map((item) => (
-              <div
-                key={item.title}
-                className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow text-center"
-              >
-                <div className="w-12 h-12 bg-pink-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-                  <item.icon className="w-6 h-6 text-pink-600" />
-                </div>
-                <h3 className="font-bold text-gray-900 mb-2">{item.title}</h3>
-                <p className="text-sm text-gray-500">{item.desc}</p>
-              </div>
-            ))}
-          </div>
+          </ScrollReveal>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-12 sm:py-16 bg-gradient-to-br from-pink-600 via-pink-500 to-yellow-400 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-2xl sm:text-3xl font-bold mb-4">
-            🚀 Únete a 200+ negocios que confían en nosotros
+      {/* Section 7: CTA — The Closer */}
+      <section className="py-16 bg-[#1E1012] text-white">
+        <div className="max-w-3xl mx-auto px-4 text-center">
+          <h2 className="text-3xl lg:text-4xl font-display font-bold mb-4">
+            Deja de buscar. Aquí está todo.
           </h2>
-
-          <p className="text-white/90 mb-8 max-w-xl mx-auto">
-            Crea tu cuenta mayorista hoy y accede a precios especiales, envíos
-            gratis y atención prioritaria.
-          </p>
-
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              href="/login"
-              className="inline-flex items-center justify-center gap-2 bg-white text-pink-600 font-bold px-8 py-4 rounded-xl hover:bg-gray-100 transition-colors shadow-lg"
-            >
-              Crear cuenta mayorista
-              <span className="text-xs font-normal text-gray-500">
-                (Gratis, 2 minutos)
-              </span>
-            </Link>
-          </div>
+          <Link
+            href="/login"
+            className="inline-flex items-center gap-2 bg-[#FF2D78] text-white font-bold px-8 py-4 rounded-full hover:brightness-110 transition-all mt-4"
+          >
+            Crear cuenta gratis
+            <span className="text-xs font-normal text-white/70">
+              (2 minutos, lo prometemos)
+            </span>
+          </Link>
         </div>
       </section>
     </div>
