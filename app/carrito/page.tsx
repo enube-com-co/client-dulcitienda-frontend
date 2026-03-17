@@ -5,11 +5,9 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import Link from "next/link";
 import {
-  ShoppingCart,
   Trash2,
   Plus,
   Minus,
-  ChevronRight,
   Loader2,
   CheckCircle,
 } from "lucide-react";
@@ -171,144 +169,137 @@ export default function CarritoPage() {
 
   if (!mounted) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-16 w-16 border-4 border-pink-500 border-t-transparent"></div>
+      <div className="min-h-screen bg-[#FFFBF0] flex flex-col items-center justify-center gap-4">
+        <div className="text-4xl animate-spin inline-block">🍬</div>
+        <p className="font-handwritten text-lg text-[#1E1012]/60">
+          Cargando cositas ricas...
+        </p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Breadcrumb */}
-      <div className="bg-white border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center gap-2 text-sm text-gray-500">
-            <Link href="/" className="hover:text-pink-600">
-              Inicio
-            </Link>
-            <ChevronRight size={16} />
-            <span className="text-gray-800 font-medium">
-              Carrito de compras
-            </span>
-          </div>
-        </div>
-      </div>
-
+    <div className="min-h-screen bg-[#FFFBF0]">
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <h1 className="text-3xl font-bold text-gray-800 mb-8">
-          Carrito de compras ({itemCount} items)
+        {/* Back link */}
+        <Link
+          href="/catalogo"
+          className="text-[#7C3AED] hover:underline text-sm font-medium"
+        >
+          ← Seguir comprando
+        </Link>
+
+        <h1 className="font-display font-bold text-[#1E1012] text-2xl sm:text-3xl mt-4 mb-8">
+          Tu carrito {itemCount > 0 && `(${itemCount})`}
         </h1>
 
         {cart.length === 0 ? (
-          <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-12 text-center">
+          <div>
             {orderCreated ? (
-              <>
-                <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <CheckCircle size={40} className="text-green-500" />
+              <div className="text-center py-20">
+                <div className="w-24 h-24 bg-[#34D399]/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <CheckCircle size={40} className="text-[#34D399]" />
                 </div>
-                <h2 className="text-2xl font-bold text-gray-800 mb-2">
+                <h2 className="text-2xl font-display font-bold text-[#1E1012] mb-2">
                   ¡Pedido creado exitosamente!
                 </h2>
-                <p className="text-gray-500 mb-6">
+                <p className="text-[#1E1012]/60 mb-6">
                   Hemos abierto WhatsApp para que confirmes tu pedido.
                 </p>
                 <Link href="/pedidos">
-                  <button className="px-8 py-4 bg-pink-500 text-white rounded-full font-bold hover:bg-gradient-to-r from-pink-600 via-pink-500 to-yellow-400 transition-colors">
+                  <button className="inline-block bg-[#FF2D78] text-white px-6 py-3 rounded-full font-bold hover:brightness-110 transition-all">
                     Ver mis pedidos
                   </button>
                 </Link>
-              </>
+              </div>
             ) : (
-              <>
-                <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <ShoppingCart size={40} className="text-gray-400" />
-                </div>
-                <h2 className="text-2xl font-bold text-gray-800 mb-2">
-                  Tu carrito está vacío
+              <div className="text-center py-20">
+                <div className="text-6xl mb-4">🍬</div>
+                <h2 className="text-2xl font-display font-bold text-[#1E1012] mb-2">
+                  Aquí no hay nada... todavía
                 </h2>
-                <p className="text-gray-500 mb-6">
-                  ¡Agrega algunos productos para comenzar tu pedido!
+                <p className="text-[#1E1012]/60 mb-6 font-handwritten text-xl">
+                  Tu carrito está más vacío que nevera de lunes
                 </p>
-                <Link href="/catalogo">
-                  <button className="px-8 py-4 bg-pink-500 text-white rounded-full font-bold hover:bg-gradient-to-r from-pink-600 via-pink-500 to-yellow-400 transition-colors">
-                    Ver catálogo
-                  </button>
+                <Link
+                  href="/catalogo"
+                  className="inline-block bg-[#FF2D78] text-white px-6 py-3 rounded-full font-bold hover:brightness-110 transition-all"
+                >
+                  Ir al catálogo
                 </Link>
-              </>
+              </div>
             )}
           </div>
         ) : (
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Cart Items */}
             <div className="lg:col-span-2 space-y-4">
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                {cart.map((item, index) => (
-                  <div
-                    key={item.productId}
-                    className={`p-6 ${index !== cart.length - 1 ? "border-b" : ""}`}
-                  >
-                    <div className="flex gap-4">
-                      <div className="w-24 h-24 bg-gradient-to-br from-pink-100 to-purple-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                        <span className="text-3xl">📦</span>
+              {cart.map((item) => (
+                <div
+                  key={item.productId}
+                  className="bg-white rounded-2xl shadow-md p-4"
+                >
+                  <div className="flex gap-4">
+                    <div className="w-24 h-24 bg-gradient-to-br from-pink-100 to-purple-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                      <span className="text-3xl">📦</span>
+                    </div>
+
+                    <div className="flex-1">
+                      <div className="flex items-start justify-between mb-2">
+                        <div>
+                          <Link href={`/producto/${item.sku}`}>
+                            <h3 className="font-display font-semibold text-[#1E1012] hover:text-[#7C3AED] transition-colors">
+                              {item.name}
+                            </h3>
+                          </Link>
+                          <p className="text-sm text-[#1E1012]/50">
+                            SKU: {item.sku}
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => removeItem(item.productId)}
+                          className="p-2 text-[#1E1012]/40 hover:text-red-500 transition-colors"
+                        >
+                          <Trash2 size={20} />
+                        </button>
                       </div>
 
-                      <div className="flex-1">
-                        <div className="flex items-start justify-between mb-2">
-                          <div>
-                            <Link href={`/producto/${item.sku}`}>
-                              <h3 className="font-bold text-gray-800 hover:text-pink-600 transition-colors">
-                                {item.name}
-                              </h3>
-                            </Link>
-                            <p className="text-sm text-gray-500">
-                              SKU: {item.sku}
-                            </p>
-                          </div>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
                           <button
-                            onClick={() => removeItem(item.productId)}
-                            className="p-2 text-gray-400 hover:text-red-500 transition-colors"
+                            onClick={() =>
+                              updateQuantity(item.productId, -item.packSize)
+                            }
+                            className="bg-[#FF2D78] text-white rounded-full w-8 h-8 flex items-center justify-center hover:brightness-110 transition-all"
                           >
-                            <Trash2 size={20} />
+                            <Minus size={16} />
+                          </button>
+                          <span className="w-16 text-center font-medium text-[#1E1012]">
+                            {item.quantity}
+                          </span>
+                          <button
+                            onClick={() =>
+                              updateQuantity(item.productId, item.packSize)
+                            }
+                            className="bg-[#FF2D78] text-white rounded-full w-8 h-8 flex items-center justify-center hover:brightness-110 transition-all"
+                          >
+                            <Plus size={16} />
                           </button>
                         </div>
 
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <button
-                              onClick={() =>
-                                updateQuantity(item.productId, -item.packSize)
-                              }
-                              className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-pink-100 hover:text-pink-600 transition-colors"
-                            >
-                              <Minus size={16} />
-                            </button>
-                            <span className="w-16 text-center font-medium">
-                              {item.quantity}
-                            </span>
-                            <button
-                              onClick={() =>
-                                updateQuantity(item.productId, item.packSize)
-                              }
-                              className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-pink-100 hover:text-pink-600 transition-colors"
-                            >
-                              <Plus size={16} />
-                            </button>
-                          </div>
-
-                          <div className="text-right">
-                            <p className="font-bold text-lg text-pink-600">
-                              ${(item.price * item.quantity).toLocaleString()}
-                            </p>
-                            <p className="text-sm text-gray-500">
-                              ${item.price.toLocaleString()} c/u
-                            </p>
-                          </div>
+                        <div className="text-right">
+                          <p className="font-bold text-lg text-[#1E1012]">
+                            ${(item.price * item.quantity).toLocaleString()}
+                          </p>
+                          <p className="text-sm text-[#1E1012]/50">
+                            ${item.price.toLocaleString()} c/u
+                          </p>
                         </div>
                       </div>
                     </div>
                   </div>
-                ))}
-              </div>
+                </div>
+              ))}
 
               <button
                 onClick={clearCart}
@@ -320,26 +311,26 @@ export default function CarritoPage() {
 
             {/* Order Summary */}
             <div className="lg:col-span-1">
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sticky top-24">
-                <h2 className="text-xl font-bold text-gray-800 mb-6">
+              <div className="bg-white rounded-2xl shadow-md p-6 sticky top-24">
+                <h2 className="font-display font-bold text-xl text-[#1E1012] mb-6">
                   Resumen del pedido
                 </h2>
 
                 <div className="space-y-4 mb-6">
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-600">Subtotal</span>
-                    <span className="font-medium">
+                    <span className="text-[#1E1012]/70">Subtotal</span>
+                    <span className="font-medium text-[#1E1012]">
                       ${subtotal.toLocaleString()}
                     </span>
                   </div>
 
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-600">Envío</span>
+                    <span className="text-[#1E1012]/70">Envío</span>
                     <span
                       className={
                         shipping === 0
-                          ? "text-green-600 font-medium"
-                          : "font-medium"
+                          ? "text-[#34D399] font-medium"
+                          : "font-medium text-[#1E1012]"
                       }
                     >
                       {shipping === 0
@@ -349,18 +340,16 @@ export default function CarritoPage() {
                   </div>
 
                   {shipping > 0 && (
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-[#1E1012]/50">
                       Te faltan ${(200000 - subtotal).toLocaleString()} para
                       envío gratis
                     </p>
                   )}
 
-                  <div className="border-t pt-4">
+                  <div className="border-t-2 border-dashed border-[#1E1012]/10 pt-4">
                     <div className="flex items-center justify-between">
-                      <span className="text-lg font-bold text-gray-800">
-                        Total
-                      </span>
-                      <span className="text-2xl font-bold text-pink-600">
+                      <span className="text-[#1E1012]/70">Total</span>
+                      <span className="font-display font-bold text-xl text-[#1E1012]">
                         ${total.toLocaleString()}
                       </span>
                     </div>
@@ -382,7 +371,7 @@ export default function CarritoPage() {
                 <button
                   onClick={handleCheckout}
                   disabled={creatingOrder}
-                  className="w-full py-4 bg-green-500 text-white rounded-xl font-bold text-lg hover:bg-green-600 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                  className="bg-[#FF2D78] text-white rounded-full py-4 text-lg font-bold w-full hover:brightness-110 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
                 >
                   {creatingOrder ? (
                     <>
@@ -390,10 +379,10 @@ export default function CarritoPage() {
                       Creando pedido...
                     </>
                   ) : (
-                    <>💬 Enviar pedido por WhatsApp</>
+                    <>🚀 Hacer pedido</>
                   )}
                 </button>
-                <p className="text-center text-sm text-gray-500 mt-4">
+                <p className="text-center text-sm text-[#1E1012]/50 mt-4">
                   {user
                     ? "Tu pedido se guardará en tu historial"
                     : "Te redirigiremos a WhatsApp para confirmar tu pedido"}
