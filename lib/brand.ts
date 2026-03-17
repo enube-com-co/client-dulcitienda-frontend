@@ -1,75 +1,32 @@
-// Dulcitienda brand colors - EXACT from official logo
-export const brandColors = {
-  // Primary - Rosa/Magenta (del dulce principal)
-  primary: {
-    DEFAULT: '#EC4899', // Rosa principal
-    light: '#F472B6',
-    dark: '#DB2777',
-    50: '#FDF2F8',
-    100: '#FCE7F3',
-    200: '#FBCFE8',
-    300: '#F9A8D4',
-    400: '#F472B6',
-    500: '#EC4899',
-    600: '#DB2777',
-    700: '#BE185D',
-    800: '#9D174D',
-    900: '#831843',
-  },
-  // Secondary - Azul del fondo y del dulce
-  secondary: {
-    DEFAULT: '#1E40AF', // Azul oscuro fondo
-    light: '#3B82F6',
-    dark: '#1E3A8A',
-    candy: '#60A5FA', // Azul claro del dulce
-  },
-  // Accent - Amarillo (centro del dulce)
-  accent: {
-    DEFAULT: '#FCD34D', // Amarillo principal
-    light: '#FDE68A',
-    dark: '#F59E0B',
-  },
-  // Background
-  background: {
-    DEFAULT: '#EFF6FF', // Azul muy claro
-    dark: '#1E3A8A', // Azul del logo
-  }
+export const colors = {
+  purple: "#7C3AED",
+  pink: "#FF2D78",
+  mint: "#34D399",
+  mango: "#FBBF24",
+  cream: "#FFFBF0",
+  chocolate: "#1E1012",
+} as const;
+
+export const categoryConfig: Record<string, { color: string; emoji: string; label: string }> = {
+  gaseosas:   { color: "#EF4444", emoji: "\u{1F964}", label: "Gaseosas" },
+  snacks:     { color: "#F97316", emoji: "\u{1F37F}", label: "Snacks" },
+  dulces:     { color: "#EC4899", emoji: "\u{1F36C}", label: "Dulces" },
+  licores:    { color: "#8B5CF6", emoji: "\u{1F377}", label: "Licores" },
+  gomas:      { color: "#14B8A6", emoji: "\u{1FAE7}", label: "Gomas" },
+  chocolates: { color: "#D97706", emoji: "\u{1F36B}", label: "Chocolates" },
+  ancheteria: { color: "#84CC16", emoji: "\u{1F381}", label: "Ancheter\u00EDa" },
+  confiteria: { color: "#06B6D4", emoji: "\u{1F36D}", label: "Confiter\u00EDa" },
+  galletas:   { color: "#EA580C", emoji: "\u{1F36A}", label: "Galletas" },
+  lacteos:    { color: "#38BDF8", emoji: "\u{1F95B}", label: "L\u00E1cteos" },
 };
 
-// Tailwind classes for Dulcitienda theme - EXACT colors
-export const theme = {
-  // Header/Top bar - gradiente rosa a amarillo
-  topBar: 'bg-gradient-to-r from-pink-500 via-pink-400 to-yellow-300',
-  header: 'bg-white shadow-lg',
-  
-  // Buttons - estilo del botón "Visítanos Ahora"
-  buttonPrimary: 'bg-pink-500 hover:bg-pink-600 text-white rounded-full shadow-lg',
-  buttonSecondary: 'bg-yellow-400 hover:bg-yellow-500 text-gray-900 rounded-full',
-  
-  // Hero - fondo azul como el logo
-  hero: 'bg-gradient-to-br from-blue-800 via-blue-700 to-pink-500',
-  
-  // Cards
-  card: 'bg-white rounded-2xl shadow-lg border border-pink-100',
-  
-  // Text
-  textPrimary: 'text-pink-500',
-  textSecondary: 'text-blue-800',
-  
-  // Category colors - más vibrantes
-  categoryColors: {
-    "gaseosas": "from-red-500 to-pink-500",
-    "snacks": "from-yellow-400 to-orange-500",
-    "dulces": "from-pink-400 to-pink-600",
-    "gomas": "from-purple-500 to-pink-500",
-    "chocolates": "from-amber-600 to-yellow-400",
-    "ancheteria": "from-green-400 to-yellow-400",
-    "confiteria": "from-cyan-400 to-pink-400",
-    "licores": "from-blue-700 to-pink-600",
-    "galletas": "from-orange-300 to-yellow-400",
-    "lacteos": "from-blue-300 to-pink-300",
-  },
-};
+export const defaultCategory = { color: "#7C3AED", emoji: "\u{1F36C}", label: "Otros" };
 
-// Slogan oficial
-export const SLOGAN = "Surtiendo Felicidad!!!";
+export const SLOGAN = "Endulzando tu d\u00EDa";
+
+export const marqueeMessages = [
+  "Env\u00EDo gratis en Neiva +$200k",
+  "Tu dieta empieza el lunes... o no",
+  "550+ productos para endulzar la vida",
+  "Pedidos por WhatsApp tambi\u00E9n, no somos dif\u00EDciles",
+];
