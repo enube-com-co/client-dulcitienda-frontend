@@ -1,30 +1,49 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter, Fredoka, Caveat } from "next/font/google";
 import "./globals.css";
 import { ConvexClientProvider } from "./ConvexClientProvider";
+import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const fredoka = Fredoka({
+  variable: "--font-fredoka",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+});
+
+const caveat = Caveat({
+  variable: "--font-caveat",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
   title: "Dulcitienda | Distribuidora Mayorista de Dulces y Licores en Neiva",
-  description: "Distribuidora mayorista en Neiva. Venta de dulces, snacks y licores al por mayor para tiendas y negocios. Precios competitivos y envío en Huila.",
-  keywords: ["distribuidora mayorista Neiva", "venta de dulces al por mayor", "confitería mayorista Huila", "licores al por mayor Neiva", "golosinas distribuidor", "snacks mayorista", "gaseosas al por mayor", "abarrotes Neiva"],
+  description:
+    "Distribuidora mayorista en Neiva. Venta de dulces, snacks y licores al por mayor para tiendas y negocios. Precios competitivos y envío en Huila.",
+  keywords: [
+    "distribuidora mayorista Neiva",
+    "venta de dulces al por mayor",
+    "confitería mayorista Huila",
+    "licores al por mayor Neiva",
+    "golosinas distribuidor",
+    "snacks mayorista",
+    "gaseosas al por mayor",
+    "abarrotes Neiva",
+  ],
   authors: [{ name: "Dulcitienda" }],
   creator: "Dulcitienda",
   publisher: "Dulcitienda",
   robots: "index, follow",
   openGraph: {
     title: "Dulcitienda | Distribuidora Mayorista de Dulces y Licores en Neiva",
-    description: "Distribuidora mayorista en Neiva. Venta de dulces, snacks y licores al por mayor para tiendas y negocios.",
+    description:
+      "Distribuidora mayorista en Neiva. Venta de dulces, snacks y licores al por mayor para tiendas y negocios.",
     type: "website",
     url: "https://dulcitienda.com.co",
     siteName: "Dulcitienda",
@@ -41,7 +60,8 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Dulcitienda | Distribuidora Mayorista de Dulces y Licores en Neiva",
-    description: "Distribuidora mayorista en Neiva. Venta de dulces, snacks y licores al por mayor para tiendas y negocios.",
+    description:
+      "Distribuidora mayorista en Neiva. Venta de dulces, snacks y licores al por mayor para tiendas y negocios.",
     images: ["https://dulcitienda.com.co/og-image.jpg"],
   },
   alternates: {
@@ -68,7 +88,8 @@ export default function RootLayout({
               "@context": "https://schema.org",
               "@type": "LocalBusiness",
               name: "Dulcitienda",
-              description: "Distribuidora mayorista de dulces, snacks y licores en Neiva",
+              description:
+                "Distribuidora mayorista de dulces, snacks y licores en Neiva",
               url: "https://dulcitienda.com.co",
               telephone: "+57-313-230-9867",
               email: "dulcitiendajm@gmail.com",
@@ -87,7 +108,14 @@ export default function RootLayout({
               openingHoursSpecification: [
                 {
                   "@type": "OpeningHoursSpecification",
-                  dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+                  dayOfWeek: [
+                    "Monday",
+                    "Tuesday",
+                    "Wednesday",
+                    "Thursday",
+                    "Friday",
+                    "Saturday",
+                  ],
                   opens: "08:00",
                   closes: "18:00",
                 },
@@ -127,9 +155,10 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}
+        className={`${inter.variable} ${fredoka.variable} ${caveat.variable} font-sans antialiased min-h-screen flex flex-col`}
       >
         <ConvexClientProvider>
+          <Header />
           <main className="flex-grow">{children}</main>
           <Footer />
         </ConvexClientProvider>
