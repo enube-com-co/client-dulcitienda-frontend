@@ -144,7 +144,7 @@ export default function SearchDropdown({ onClose }: SearchDropdownProps) {
                 <Link
                   href={`/buscar?q=${encodeURIComponent(query)}`}
                   onClick={handleSelect}
-                  className="block p-3 text-center text-pink-600 font-medium hover:bg-pink-50 transition-colors"
+                  className="block p-3 text-center text-[#FF2D78] font-medium hover:bg-pink-50 transition-colors"
                 >
                   Ver todos los resultados →
                 </Link>
