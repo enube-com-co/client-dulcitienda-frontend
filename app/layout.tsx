@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Fredoka, Caveat } from "next/font/google";
 import "./globals.css";
 import { ConvexClientProvider } from "./ConvexClientProvider";
+import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
 const inter = Inter({
@@ -157,6 +158,7 @@ export default function RootLayout({
         className={`${inter.variable} ${fredoka.variable} ${caveat.variable} font-sans antialiased min-h-screen flex flex-col`}
       >
         <ConvexClientProvider>
+          <Header />
           <main className="flex-grow">{children}</main>
           <Footer />
         </ConvexClientProvider>
