@@ -27,23 +27,23 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-4 border-pink-500 border-t-transparent"></div>
+      <div className="min-h-screen bg-[#FFFBF0] flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#FF2D78] border-t-transparent"></div>
       </div>
     );
   }
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md p-8 text-center">
-          <div className="w-16 h-16 bg-pink-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <User className="w-8 h-8 text-pink-600" />
+      <div className="min-h-screen bg-[#FFFBF0] flex items-center justify-center p-4">
+        <Card className="w-full max-w-md p-8 text-center bg-white rounded-2xl shadow-md">
+          <div className="w-16 h-16 bg-[#FF2D78]/10 rounded-full flex items-center justify-center mx-auto mb-4">
+            <User className="w-8 h-8 text-[#FF2D78]" />
           </div>
-          <h1 className="text-xl font-bold mb-2">No has iniciado sesión</h1>
-          <p className="text-gray-500 mb-6">Inicia sesión para ver tu perfil y pedidos</p>
+          <h1 className="font-display font-bold text-xl text-[#1E1012] mb-2">No has iniciado sesión</h1>
+          <p className="text-[#1E1012]/60 mb-6">Inicia sesión para ver tu perfil y pedidos</p>
           <Link href="/login">
-            <Button className="w-full bg-gradient-to-r from-pink-500 to-yellow-400">
+            <Button className="w-full bg-[#FF2D78] text-white rounded-full font-bold hover:opacity-90">
               Iniciar sesión
             </Button>
           </Link>
@@ -53,21 +53,21 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-[#FFFBF0] py-8">
       <div className="max-w-4xl mx-auto px-4">
         {/* Header */}
-        <div className="bg-gradient-to-r from-pink-500 to-yellow-400 rounded-2xl p-8 text-white mb-8">
+        <div className="bg-[#7C3AED] rounded-2xl p-8 text-white mb-8">
           <div className="flex items-center gap-4">
             <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center">
               <User size={40} />
             </div>
             <div>
-              <h1 className="text-2xl font-bold">{user.name}</h1>
+              <h1 className="font-display font-bold text-2xl text-white">{user.name}</h1>
               <p className="text-white/80">{user.email}</p>
               {user.company && <p className="text-white/60 text-sm">{user.company}</p>}
               <div className="flex items-center gap-2 mt-2">
-                <Crown size={16} className="text-amber-700" />
-                <span className="text-sm font-medium text-amber-700">Cliente Bronce</span>
+                <Crown size={16} className="text-[#FBBF24]" />
+                <span className="text-sm font-medium text-[#FBBF24]">Cliente Bronce</span>
               </div>
             </div>
           </div>
@@ -76,36 +76,36 @@ export default function ProfilePage() {
         {/* Menu */}
         <div className="grid gap-4">
           <Link href="/pedidos">
-            <Card className="p-4 flex items-center justify-between hover:shadow-md transition-shadow">
+            <Card className="p-4 flex items-center justify-between hover:shadow-md transition-shadow bg-white rounded-2xl shadow-md">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-pink-100 rounded-full flex items-center justify-center">
-                  <Package className="text-pink-600" />
+                <div className="w-12 h-12 bg-[#FF2D78]/10 rounded-full flex items-center justify-center">
+                  <Package className="text-[#FF2D78]" />
                 </div>
                 <div>
-                  <h2 className="font-semibold">Mis Pedidos</h2>
-                  <p className="text-sm text-gray-500">Ver historial de compras</p>
+                  <h2 className="font-display font-bold text-[#1E1012]">Mis Pedidos</h2>
+                  <p className="text-sm text-[#1E1012]/50">Ver historial de compras</p>
                 </div>
               </div>
-              <ChevronRight className="text-gray-400" />
+              <ChevronRight className="text-[#1E1012]/30" />
             </Card>
           </Link>
 
-          <Card className="p-4 flex items-center justify-between">
+          <Card className="p-4 flex items-center justify-between bg-white rounded-2xl shadow-md">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
-                <MapPin className="text-yellow-600" />
+              <div className="w-12 h-12 bg-[#FBBF24]/20 rounded-full flex items-center justify-center">
+                <MapPin className="text-[#FBBF24]" />
               </div>
               <div>
-                <h2 className="font-semibold">Direcciones</h2>
-                <p className="text-sm text-gray-500">Gestionar direcciones de envío</p>
+                <h2 className="font-display font-bold text-[#1E1012]">Direcciones</h2>
+                <p className="text-sm text-[#1E1012]/50">Gestionar direcciones de envío</p>
               </div>
             </div>
-            <ChevronRight className="text-gray-400" />
+            <ChevronRight className="text-[#1E1012]/30" />
           </Card>
 
-          <Button 
-            variant="outline" 
-            className="w-full py-6 text-red-600 border-red-200 hover:bg-red-50"
+          <Button
+            variant="outline"
+            className="w-full py-6 text-red-600 border-red-200 hover:bg-red-50 rounded-full font-bold"
             onClick={handleLogout}
           >
             <LogOut className="mr-2" size={18} />
