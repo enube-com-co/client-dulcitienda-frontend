@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { query, mutation, action } from "./_generated/server";
 import { api } from "./_generated/api";
+import { requireAdmin } from "./auth";
 
 // ==================== QUERIES ====================
 
@@ -10,11 +11,8 @@ import { api } from "./_generated/api";
 export const getAll = query({
   args: {},
   handler: async (ctx) => {
-    const promotions = await ctx.db
-      .query("promotions")
-      .order("desc")
-      .collect();
-    
+    const promotions = await ctx.db.query("promotions").order("desc").collect();
+
     return promotions;
   },
 });
@@ -26,7 +24,7 @@ export const getActive = query({
   args: {},
   handler: async (ctx) => {
     const now = Date.now();
-    
+
     const promotions = await ctx.db
       .query("promotions")
       .withIndex("by_active", (q) => q.eq("isActive", true))
@@ -34,7 +32,7 @@ export const getActive = query({
       .filter((q) => q.gt(q.field("endDate"), now))
       .order("desc")
       .collect();
-    
+
     return promotions;
   },
 });
@@ -49,7 +47,7 @@ export const getByCode = query({
       .query("promotions")
       .withIndex("by_code", (q) => q.eq("code", code.toUpperCase()))
       .first();
-    
+
     return promotion;
   },
 });
@@ -75,11 +73,11 @@ export const getUserUsageCount = query({
   handler: async (ctx, { promotionId, userId }) => {
     const usages = await ctx.db
       .query("promotionUsages")
-      .withIndex("by_promotion_user", (q) => 
-        q.eq("promotionId", promotionId).eq("userId", userId)
+      .withIndex("by_promotion_user", (q) =>
+        q.eq("promotionId", promotionId).eq("userId", userId),
       )
       .collect();
-    
+
     return usages.length;
   },
 });
@@ -97,13 +95,13 @@ export const create = mutation({
     type: v.union(
       v.literal("PERCENTAGE"),
       v.literal("FIXED_AMOUNT"),
-      v.literal("FREE_SHIPPING")
+      v.literal("FREE_SHIPPING"),
     ),
     scope: v.union(
       v.literal("GLOBAL"),
       v.literal("CATEGORY"),
       v.literal("PRODUCT"),
-      v.literal("USER")
+      v.literal("USER"),
     ),
     value: v.number(),
     maxDiscount: v.optional(v.number()),
@@ -120,34 +118,25 @@ export const create = mutation({
     priority: v.number(),
   },
   handler: async (ctx, args) => {
+    const { user } = await requireAdmin(ctx);
     const now = Date.now();
-    
+
     // Verificar que el código no exista
     const existing = await ctx.db
       .query("promotions")
       .withIndex("by_code", (q) => q.eq("code", args.code.toUpperCase()))
       .first();
-    
+
     if (existing) {
       throw new Error(`El código ${args.code} ya existe`);
     }
 
-    // Obtener userId del contexto de auth
-    const identity = await ctx.auth.getUserIdentity();
-    const user = identity ? await ctx.db.query("users").withIndex("by_email", (q) => q.eq("email", identity.email)).first() : null;
-    
     const promotionId = await ctx.db.insert("promotions", {
       ...args,
       code: args.code.toUpperCase(),
       usageCount: 0,
       isActive: true,
-      createdBy: user?._id ?? (await ctx.db.insert("users", {
-        email: "admin@system.com",
-        name: "System Admin",
-        role: "admin",
-        isActive: true,
-        createdAt: now,
-      })),
+      createdBy: user._id,
       createdAt: now,
       updatedAt: now,
     });
@@ -180,6 +169,8 @@ export const update = mutation({
     priority: v.optional(v.number()),
   },
   handler: async (ctx, { id, ...updates }) => {
+    await requireAdmin(ctx);
+
     const promotion = await ctx.db.get(id);
     if (!promotion) {
       throw new Error("Promoción no encontrada");
@@ -200,6 +191,7 @@ export const update = mutation({
 export const remove = mutation({
   args: { id: v.id("promotions") },
   handler: async (ctx, { id }) => {
+    await requireAdmin(ctx);
     await ctx.db.delete(id);
     return true;
   },
@@ -246,29 +238,35 @@ export const validateAndApply = action({
   args: {
     code: v.string(),
     cart: v.object({
-      items: v.array(v.object({
-        sku: v.string(),
-        name: v.string(),
-        price: v.number(),
-        quantity: v.number(),
-        categoryId: v.id("categories"),
-      })),
+      items: v.array(
+        v.object({
+          sku: v.string(),
+          name: v.string(),
+          price: v.number(),
+          quantity: v.number(),
+          categoryId: v.id("categories"),
+        }),
+      ),
       subtotal: v.number(),
       shippingCost: v.number(),
     }),
     userId: v.optional(v.id("users")),
-    alreadyApplied: v.optional(v.array(v.object({
-      promotionId: v.id("promotions"),
-      code: v.string(),
-      name: v.string(),
-      type: v.union(
-        v.literal("PERCENTAGE"),
-        v.literal("FIXED_AMOUNT"),
-        v.literal("FREE_SHIPPING")
+    alreadyApplied: v.optional(
+      v.array(
+        v.object({
+          promotionId: v.id("promotions"),
+          code: v.string(),
+          name: v.string(),
+          type: v.union(
+            v.literal("PERCENTAGE"),
+            v.literal("FIXED_AMOUNT"),
+            v.literal("FREE_SHIPPING"),
+          ),
+          discountAmount: v.number(),
+          description: v.string(),
+        }),
       ),
-      discountAmount: v.number(),
-      description: v.string(),
-    }))),
+    ),
   },
   handler: async (ctx, args) => {
     const { code, cart, userId, alreadyApplied = [] } = args;
@@ -302,7 +300,9 @@ export const validateAndApply = action({
     // Verificar si hay una exclusiva ya aplicada
     let hasExclusive = false;
     for (const ap of alreadyApplied) {
-      const p = await ctx.runQuery(api.promotions.getById, { id: ap.promotionId });
+      const p = await ctx.runQuery(api.promotions.getById, {
+        id: ap.promotionId,
+      });
       if (p?.isExclusive) {
         hasExclusive = true;
         break;
@@ -312,7 +312,8 @@ export const validateAndApply = action({
     if (hasExclusive) {
       return {
         success: false,
-        error: "No puedes aplicar esta promoción porque ya tienes una promoción exclusiva",
+        error:
+          "No puedes aplicar esta promoción porque ya tienes una promoción exclusiva",
       };
     }
 
@@ -330,7 +331,10 @@ export const validateAndApply = action({
     }
 
     if (promotion.usageLimit && promotion.usageCount >= promotion.usageLimit) {
-      return { success: false, error: "Esta promoción ha alcanzado su límite de usos" };
+      return {
+        success: false,
+        error: "Esta promoción ha alcanzado su límite de usos",
+      };
     }
 
     if (promotion.minPurchase && cart.subtotal < promotion.minPurchase) {
@@ -342,10 +346,13 @@ export const validateAndApply = action({
 
     // Verificar límite por usuario
     if (userId && promotion.perUserLimit) {
-      const userUsageCount = await ctx.runQuery(api.promotions.getUserUsageCount, {
-        promotionId: promotion._id,
-        userId,
-      });
+      const userUsageCount = await ctx.runQuery(
+        api.promotions.getUserUsageCount,
+        {
+          promotionId: promotion._id,
+          userId,
+        },
+      );
 
       if (userUsageCount >= promotion.perUserLimit) {
         return {
@@ -367,7 +374,10 @@ export const validateAndApply = action({
     // Calcular descuento
     const discountAmount = calculateDiscount(promotion, cart);
 
-    const currentDiscount = alreadyApplied.reduce((sum, ap) => sum + ap.discountAmount, 0);
+    const currentDiscount = alreadyApplied.reduce(
+      (sum, ap) => sum + ap.discountAmount,
+      0,
+    );
 
     return {
       success: true,
@@ -379,7 +389,8 @@ export const validateAndApply = action({
         discountAmount,
         description: promotion.description,
       },
-      newTotal: cart.subtotal + cart.shippingCost - currentDiscount - discountAmount,
+      newTotal:
+        cart.subtotal + cart.shippingCost - currentDiscount - discountAmount,
       discountAmount,
     };
   },
@@ -395,13 +406,13 @@ function checkScope(promotion: any, cart: any): boolean {
     case "CATEGORY":
       if (!promotion.applicableCategories?.length) return false;
       return cart.items.some((item: any) =>
-        promotion.applicableCategories?.includes(item.categoryId)
+        promotion.applicableCategories?.includes(item.categoryId),
       );
 
     case "PRODUCT":
       if (!promotion.applicableProducts?.length) return false;
       return cart.items.some((item: any) =>
-        promotion.applicableProducts?.includes(item.sku)
+        promotion.applicableProducts?.includes(item.sku),
       );
 
     case "USER":

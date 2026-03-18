@@ -13,15 +13,15 @@ export const createOrUpdateFromLogin = mutation({
   handler: async (ctx, args) => {
     const { email, name, phone, company } = args;
     const normalizedEmail = email.toLowerCase().trim();
-    
+
     // Check if user exists
     const existingUser = await ctx.db
       .query("users")
       .withIndex("by_email", (q) => q.eq("email", normalizedEmail))
       .first();
-    
+
     const now = Date.now();
-    
+
     if (existingUser) {
       // Update last login
       await ctx.db.patch(existingUser._id, {
@@ -29,15 +29,12 @@ export const createOrUpdateFromLogin = mutation({
       });
       return existingUser._id;
     }
-    
-    // Determine role based on email
-    let role: "admin" | "power_user" | "customer" = "customer";
-    if (normalizedEmail === "andres.monje@enube.com.co") {
-      role = "admin";
-    } else if (normalizedEmail.endsWith("@enube.com.co")) {
-      role = "power_user";
-    }
-    
+
+    // All new registrations start as customers.
+    // Admin/power_user roles must be assigned manually by an existing admin
+    // after the user's email has been verified through a proper auth provider.
+    const role: "admin" | "power_user" | "customer" = "customer";
+
     // Create new user
     const userId = await ctx.db.insert("users", {
       email: normalizedEmail,
@@ -50,7 +47,7 @@ export const createOrUpdateFromLogin = mutation({
       createdAt: now,
       lastLoginAt: now,
     });
-    
+
     return userId;
   },
 });
@@ -63,12 +60,12 @@ export const getByEmail = query({
   returns: v.any(),
   handler: async (ctx, args) => {
     const normalizedEmail = args.email.toLowerCase().trim();
-    
+
     const user = await ctx.db
       .query("users")
       .withIndex("by_email", (q) => q.eq("email", normalizedEmail))
       .first();
-    
+
     return user;
   },
 });

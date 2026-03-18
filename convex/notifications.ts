@@ -1,13 +1,27 @@
 import { v } from "convex/values";
-import { mutation, query, internalMutation } from "./_generated/server";
+import {
+  mutation,
+  query,
+  internalQuery,
+  internalMutation,
+} from "./_generated/server";
+import { requireAdmin } from "./auth";
 
-// Notification settings for the store owner
+// Notification settings for the store owner (redacts API keys from client)
 export const getSettings = query({
   args: {},
   returns: v.any(),
   handler: async (ctx) => {
     const settings = await ctx.db.query("notificationSettings").first();
-    return settings;
+    if (!settings) return null;
+
+    // Redact sensitive API keys from client-facing response
+    const { resendApiKey, metaApiKey, ...safeSettings } = settings;
+    return {
+      ...safeSettings,
+      hasResendApiKey: !!resendApiKey,
+      hasMetaApiKey: !!metaApiKey,
+    };
   },
 });
 
@@ -29,8 +43,10 @@ export const updateSettings = mutation({
   },
   returns: v.id("notificationSettings"),
   handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+
     const existing = await ctx.db.query("notificationSettings").first();
-    
+
     if (existing) {
       await ctx.db.patch(existing._id, {
         ...args,
@@ -38,7 +54,7 @@ export const updateSettings = mutation({
       });
       return existing._id;
     }
-    
+
     return await ctx.db.insert("notificationSettings", {
       ...args,
       createdAt: Date.now(),
@@ -55,7 +71,7 @@ export const createNotification = mutation({
       v.literal("order_status_change"),
       v.literal("low_stock"),
       v.literal("customer_message"),
-      v.literal("new_customer")
+      v.literal("new_customer"),
     ),
     title: v.string(),
     message: v.string(),
@@ -84,11 +100,11 @@ export const getNotifications = query({
   returns: v.array(v.any()),
   handler: async (ctx, args) => {
     let query = ctx.db.query("notifications").order("desc");
-    
+
     if (args.unreadOnly) {
       query = query.filter((q) => q.eq(q.field("read"), false));
     }
-    
+
     return await query.take(args.limit || 50);
   },
 });
@@ -105,20 +121,31 @@ export const markAsRead = mutation({
   },
 });
 
-// Mark all as read
+// Mark all as read (admin only)
 export const markAllAsRead = mutation({
   args: {},
   returns: v.null(),
   handler: async (ctx) => {
+    await requireAdmin(ctx);
+
     const notifications = await ctx.db
       .query("notifications")
       .filter((q) => q.eq(q.field("read"), false))
       .collect();
-    
+
     for (const notif of notifications) {
       await ctx.db.patch(notif._id, { read: true });
     }
     return null;
+  },
+});
+
+// Internal-only: get raw settings including API keys (for cron jobs)
+export const getSettingsInternal = internalQuery({
+  args: {},
+  returns: v.any(),
+  handler: async (ctx) => {
+    return await ctx.db.query("notificationSettings").first();
   },
 });
 
@@ -143,7 +170,7 @@ export const getRecentByType = query({
       v.literal("order_status_change"),
       v.literal("low_stock"),
       v.literal("customer_message"),
-      v.literal("new_customer")
+      v.literal("new_customer"),
     ),
     since: v.number(),
   },
@@ -154,28 +181,33 @@ export const getRecentByType = query({
       .filter((q) =>
         q.and(
           q.eq(q.field("type"), args.type),
-          q.gt(q.field("createdAt"), args.since)
-        )
+          q.gt(q.field("createdAt"), args.since),
+        ),
       )
       .collect();
   },
 });
 
 // Helper: Send email via Resend
-async function sendEmail({ to, subject, text, apiKey }: { 
-  to: string; 
-  subject: string; 
-  text: string; 
+async function sendEmail({
+  to,
+  subject,
+  text,
+  apiKey,
+}: {
+  to: string;
+  subject: string;
+  text: string;
   apiKey: string;
 }) {
-  const response = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
+  const response = await fetch("https://api.resend.com/emails", {
+    method: "POST",
     headers: {
-      'Authorization': `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      from: 'Dulcitienda <notificaciones@dulcitienda.com>',
+      from: "Dulcitienda <notificaciones@dulcitienda.com>",
       to,
       subject,
       text,
@@ -191,36 +223,39 @@ async function sendEmail({ to, subject, text, apiKey }: {
 }
 
 // Helper: Send WhatsApp via Meta Business API
-async function sendWhatsAppMeta({ 
-  to, 
-  message, 
+async function sendWhatsAppMeta({
+  to,
+  message,
   apiKey,
   phoneNumberId,
-}: { 
-  to: string; 
-  message: string; 
+}: {
+  to: string;
+  message: string;
   apiKey: string;
   phoneNumberId: string;
 }) {
   // Format phone number (remove + and spaces)
-  const formattedPhone = to.replace(/\+/g, '').replace(/\s/g, '');
-  
-  const response = await fetch(`https://graph.facebook.com/v18.0/${phoneNumberId}/messages`, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      messaging_product: 'whatsapp',
-      recipient_type: 'individual',
-      to: formattedPhone,
-      type: 'text',
-      text: {
-        body: message,
+  const formattedPhone = to.replace(/\+/g, "").replace(/\s/g, "");
+
+  const response = await fetch(
+    `https://graph.facebook.com/v18.0/${phoneNumberId}/messages`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
       },
-    }),
-  });
+      body: JSON.stringify({
+        messaging_product: "whatsapp",
+        recipient_type: "individual",
+        to: formattedPhone,
+        type: "text",
+        text: {
+          body: message,
+        },
+      }),
+    },
+  );
 
   if (!response.ok) {
     const error = await response.text();
