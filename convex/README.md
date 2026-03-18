@@ -249,10 +249,10 @@ npx convex deploy --cmd 'npx convex deploy'
 
 ```bash
 # Convex deploy key (para CI/CD)
-CONVEX_DEPLOY_KEY=dev:ceaseless-ibis-857|...
+CONVEX_DEPLOY_KEY=dev:your-deployment|...
 
 # URL del backend (para frontend)
-NEXT_PUBLIC_CONVEX_URL=https://ceaseless-ibis-857.convex.cloud
+NEXT_PUBLIC_CONVEX_URL=https://your-deployment.convex.cloud
 ```
 
 ---

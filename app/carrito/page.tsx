@@ -4,13 +4,7 @@ import { useState, useEffect } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import Link from "next/link";
-import {
-  Trash2,
-  Plus,
-  Minus,
-  Loader2,
-  CheckCircle,
-} from "lucide-react";
+import { Trash2, Plus, Minus, Loader2, CheckCircle } from "lucide-react";
 import { validateCartItem } from "@/lib/validation";
 
 interface CartItem {
@@ -55,7 +49,11 @@ export default function CarritoPage() {
     }
 
     if (savedUser) {
-      setUser(JSON.parse(savedUser));
+      try {
+        setUser(JSON.parse(savedUser));
+      } catch {
+        localStorage.removeItem("dulcitienda_user");
+      }
     }
   }, []);
 
@@ -120,8 +118,6 @@ export default function CarritoPage() {
           whatsappPhone: user?.phone,
           notes: `Pedido desde carrito - Cliente: ${user?.name || "Sin registrar"}`,
         });
-
-        console.log("Order created:", result);
       }
 
       setOrderCreated(true);

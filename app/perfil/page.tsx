@@ -4,7 +4,15 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { User, Package, MapPin, LogOut, Crown, ChevronRight, Sparkles } from "lucide-react";
+import {
+  User,
+  Package,
+  MapPin,
+  LogOut,
+  Crown,
+  ChevronRight,
+  Sparkles,
+} from "lucide-react";
 import Link from "next/link";
 
 export default function ProfilePage() {
@@ -15,7 +23,11 @@ export default function ProfilePage() {
   useEffect(() => {
     const savedUser = localStorage.getItem("dulcitienda_user");
     if (savedUser) {
-      setUser(JSON.parse(savedUser));
+      try {
+        setUser(JSON.parse(savedUser));
+      } catch {
+        localStorage.removeItem("dulcitienda_user");
+      }
     }
     setLoading(false);
   }, []);
@@ -40,8 +52,12 @@ export default function ProfilePage() {
           <div className="w-16 h-16 bg-[#FF2D78]/10 rounded-full flex items-center justify-center mx-auto mb-4">
             <User className="w-8 h-8 text-[#FF2D78]" />
           </div>
-          <h1 className="font-display font-bold text-xl text-[#1E1012] mb-2">No has iniciado sesión</h1>
-          <p className="text-[#1E1012]/60 mb-6">Inicia sesión para ver tu perfil y pedidos</p>
+          <h1 className="font-display font-bold text-xl text-[#1E1012] mb-2">
+            No has iniciado sesión
+          </h1>
+          <p className="text-[#1E1012]/60 mb-6">
+            Inicia sesión para ver tu perfil y pedidos
+          </p>
           <Link href="/login">
             <Button className="w-full bg-[#FF2D78] text-white rounded-full font-bold hover:opacity-90">
               Iniciar sesión
@@ -62,12 +78,18 @@ export default function ProfilePage() {
               <User size={40} />
             </div>
             <div>
-              <h1 className="font-display font-bold text-2xl text-white">{user.name}</h1>
+              <h1 className="font-display font-bold text-2xl text-white">
+                {user.name}
+              </h1>
               <p className="text-white/80">{user.email}</p>
-              {user.company && <p className="text-white/60 text-sm">{user.company}</p>}
+              {user.company && (
+                <p className="text-white/60 text-sm">{user.company}</p>
+              )}
               <div className="flex items-center gap-2 mt-2">
                 <Crown size={16} className="text-[#FBBF24]" />
-                <span className="text-sm font-medium text-[#FBBF24]">Cliente Bronce</span>
+                <span className="text-sm font-medium text-[#FBBF24]">
+                  Cliente Bronce
+                </span>
               </div>
             </div>
           </div>
@@ -82,8 +104,12 @@ export default function ProfilePage() {
                   <Package className="text-[#FF2D78]" />
                 </div>
                 <div>
-                  <h2 className="font-display font-bold text-[#1E1012]">Mis Pedidos</h2>
-                  <p className="text-sm text-[#1E1012]/50">Ver historial de compras</p>
+                  <h2 className="font-display font-bold text-[#1E1012]">
+                    Mis Pedidos
+                  </h2>
+                  <p className="text-sm text-[#1E1012]/50">
+                    Ver historial de compras
+                  </p>
                 </div>
               </div>
               <ChevronRight className="text-[#1E1012]/30" />
@@ -96,8 +122,12 @@ export default function ProfilePage() {
                 <MapPin className="text-[#FBBF24]" />
               </div>
               <div>
-                <h2 className="font-display font-bold text-[#1E1012]">Direcciones</h2>
-                <p className="text-sm text-[#1E1012]/50">Gestionar direcciones de envío</p>
+                <h2 className="font-display font-bold text-[#1E1012]">
+                  Direcciones
+                </h2>
+                <p className="text-sm text-[#1E1012]/50">
+                  Gestionar direcciones de envío
+                </p>
               </div>
             </div>
             <ChevronRight className="text-[#1E1012]/30" />
