@@ -94,3 +94,30 @@ export const getRecentUsers = query({
       .collect();
   },
 });
+
+// Make user admin - run manually from Convex dashboard
+// Usage: npx convex run users:makeAdmin '{"email": "user@example.com"}'
+export const makeAdmin = mutation({
+  args: {
+    email: v.string(),
+  },
+  returns: v.any(),
+  handler: async (ctx, args) => {
+    const normalizedEmail = args.email.toLowerCase().trim();
+    
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_email", (q) => q.eq("email", normalizedEmail))
+      .first();
+    
+    if (!user) {
+      throw new Error(`User with email ${args.email} not found`);
+    }
+    
+    await ctx.db.patch(user._id, {
+      role: "admin",
+    });
+    
+    return { success: true, userId: user._id, email: normalizedEmail };
+  },
+});
