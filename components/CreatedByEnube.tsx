@@ -35,7 +35,7 @@ export function CreatedByEnube({ className = "" }: CreatedByEnubeProps) {
     <div className={`flex items-center justify-center gap-2 ${className}`}>
       <span className="text-gray-500 text-xs">Creado por</span>
       <Link
-        href="https://enube.net.co"
+        href="https://enube.com.co"
         target="_blank"
         rel="noopener noreferrer"
         className="group flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gray-800/50 hover:bg-gray-800 transition-colors"
