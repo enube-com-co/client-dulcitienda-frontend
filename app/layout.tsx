@@ -159,7 +159,9 @@ export default function RootLayout({
       >
         <ConvexClientProvider>
           <Header />
-          <main className="flex-grow">{children}</main>
+          <main id="main-content" className="flex-grow" role="main">
+            {children}
+          </main>
           <Footer />
         </ConvexClientProvider>
       </body>

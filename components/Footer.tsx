@@ -1,46 +1,75 @@
 import Link from "next/link";
 import { Phone, Mail, MapPin, Instagram, Facebook } from "lucide-react";
 import { SLOGAN } from "@/lib/brand";
-import { CreatedByEnube } from "./CreatedByEnube";
+import { CreatedByEnube } from "@/components/CreatedByEnube";
+import { cn } from "@/lib/utils";
 
 const footerLinks = {
   catalogo: [
-    { label: "Gaseosas", href: "/catalogo?categoria=gaseosas" },
-    { label: "Snacks", href: "/catalogo?categoria=snacks" },
-    { label: "Dulces", href: "/catalogo?categoria=dulces" },
-    { label: "Licores", href: "/catalogo?categoria=licores" },
-    { label: "Ver todo", href: "/catalogo" },
+    { href: "/catalogo?categoria=gaseosas", label: "Gaseosas" },
+    { href: "/catalogo?categoria=snacks", label: "Snacks" },
+    { href: "/catalogo?categoria=dulces", label: "Dulces" },
+    { href: "/catalogo?categoria=licores", label: "Licores" },
+    { href: "/catalogo", label: "Ver todo" },
   ],
   empresa: [
-    { label: "Sobre nosotros", href: "#" },
-    { label: "Contacto", href: "#" },
-    { label: "PQRs", href: "#" },
-    { label: "Blog", href: "#" },
+    { href: "#", label: "Sobre nosotros" },
+    { href: "#", label: "Contacto" },
+    { href: "#", label: "PQRs" },
+    { href: "#", label: "Blog" },
   ],
   soporte: [
-    { label: "Escríbenos (respondemos rápido, lo juramos)", href: "https://wa.me/573132309867", external: true },
-    { label: "Preguntas frecuentes", href: "#" },
-    { label: "Términos y condiciones", href: "#" },
-    { label: "Política de privacidad", href: "#" },
+    { href: "https://wa.me/573132309867", label: "Escríbenos (respondemos rápido, lo juramos)", external: true },
+    { href: "#", label: "Preguntas frecuentes" },
+    { href: "#", label: "Términos y condiciones" },
+    { href: "#", label: "Política de privacidad" },
   ],
 };
 
+interface FooterLinkProps {
+  href: string;
+  label: string;
+  external?: boolean;
+}
+
+function FooterLink({ href, label, external }: FooterLinkProps) {
+  const className = "text-gray-400 hover:text-[#FF2D78] transition-colors text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF2D78] focus-visible:ring-offset-2 rounded";
+  
+  if (external) {
+    return (
+      <a 
+        href={href} 
+        target="_blank" 
+        rel="noopener noreferrer" 
+        className={className}
+      >
+        {label}
+      </a>
+    );
+  }
+  
+  return <Link href={href} className={className}>{label}</Link>;
+}
+
 export default function Footer() {
   return (
-    <footer className="bg-[#1E1012] text-white">
+    <footer className="bg-[#1E1012] text-white" role="contentinfo">
       {/* Main footer */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-12">
           {/* Brand column */}
           <div className="lg:col-span-2">
-            <Link href="/" className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 bg-[#FF2D78] rounded-xl flex items-center justify-center text-2xl">
+            <Link 
+              href="/" 
+              className="flex items-center gap-3 mb-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF2D78] focus-visible:ring-offset-2 rounded-lg"
+            >
+              <div className="w-12 h-12 bg-[#FF2D78] rounded-xl flex items-center justify-center text-2xl" aria-hidden="true">
                 🍬
               </div>
               <div>
-                <h2 className="font-display font-bold text-white text-xl">
+                <p className="font-display font-bold text-white text-xl">
                   Dulcitienda
-                </h2>
+                </p>
                 <p className="text-xs text-gray-400 -mt-1">{SLOGAN}</p>
               </div>
             </Link>
@@ -51,69 +80,65 @@ export default function Footer() {
             </p>
 
             {/* Contact info */}
-            <div className="space-y-3">
-              <a href="tel:+573132309867" className="flex items-center gap-3 text-gray-400 hover:text-white transition-colors">
-                <Phone className="w-4 h-4 text-[#FF2D78]" />
+            <address className="space-y-3 not-italic">
+              <a 
+                href="tel:+573132309867" 
+                className="flex items-center gap-3 text-gray-400 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF2D78] focus-visible:ring-offset-2 rounded"
+              >
+                <Phone className="w-4 h-4 text-[#FF2D78]" aria-hidden="true" />
                 <span className="text-sm">+57 313 2309867</span>
               </a>
 
-              <a href="mailto:dulcitiendajm@gmail.com" className="flex items-center gap-3 text-gray-400 hover:text-white transition-colors">
-                <Mail className="w-4 h-4 text-[#FF2D78]" />
+              <a 
+                href="mailto:dulcitiendajm@gmail.com" 
+                className="flex items-center gap-3 text-gray-400 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF2D78] focus-visible:ring-offset-2 rounded"
+              >
+                <Mail className="w-4 h-4 text-[#FF2D78]" aria-hidden="true" />
                 <span className="text-sm">dulcitiendajm@gmail.com</span>
               </a>
 
               <div className="flex items-start gap-3 text-gray-400">
-                <MapPin className="w-4 h-4 text-[#FF2D78] mt-0.5" />
-                <span className="text-sm">Cra 3 # 7-12 Centro<br />Neiva, Huila, Colombia</span>
+                <MapPin className="w-4 h-4 text-[#FF2D78] mt-0.5" aria-hidden="true" />
+                <span className="text-sm">
+                  Cra 3 # 7-12 Centro<br />Neiva, Huila, Colombia
+                </span>
               </div>
-            </div>
+            </address>
           </div>
 
           {/* Links columns */}
-          <div>
+          <nav aria-label="Catálogo">
             <h3 className="font-display font-bold text-white mb-4">Catálogo</h3>
             <ul className="space-y-2">
               {footerLinks.catalogo.map((link) => (
-                <li key={link.label}>
-                  <Link href={link.href} className="text-gray-400 hover:text-[#FF2D78] transition-colors text-sm">
-                    {link.label}
-                  </Link>
+                <li key={link.href}>
+                  <FooterLink {...link} />
                 </li>
               ))}
             </ul>
-          </div>
+          </nav>
 
-          <div>
+          <nav aria-label="Empresa">
             <h3 className="font-display font-bold text-white mb-4">Empresa</h3>
             <ul className="space-y-2">
               {footerLinks.empresa.map((link) => (
                 <li key={link.label}>
-                  <Link href={link.href} className="text-gray-400 hover:text-[#FF2D78] transition-colors text-sm">
-                    {link.label}
-                  </Link>
+                  <FooterLink {...link} />
                 </li>
               ))}
             </ul>
-          </div>
+          </nav>
 
-          <div>
+          <nav aria-label="Soporte">
             <h3 className="font-display font-bold text-white mb-4">Soporte</h3>
             <ul className="space-y-2">
               {footerLinks.soporte.map((link) => (
                 <li key={link.label}>
-                  {link.external ? (
-                    <a href={link.href} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-[#FF2D78] transition-colors text-sm">
-                      {link.label}
-                    </a>
-                  ) : (
-                    <Link href={link.href} className="text-gray-400 hover:text-[#FF2D78] transition-colors text-sm">
-                      {link.label}
-                    </Link>
-                  )}
+                  <FooterLink {...link} />
                 </li>
               ))}
             </ul>
-          </div>
+          </nav>
         </div>
       </div>
 
@@ -126,7 +151,7 @@ export default function Footer() {
                 Hecho con azúcar y wifi en Neiva, Huila
               </p>
               <p className="text-gray-600 text-xs text-center sm:text-left">
-                © 2025 Dulcitienda
+                © {new Date().getFullYear()} Dulcitienda
               </p>
               <CreatedByEnube />
             </div>
@@ -134,14 +159,20 @@ export default function Footer() {
             {/* Social links */}
             <div className="flex items-center gap-4">
               <a
-                href="#"
-                className="w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center text-gray-400 hover:bg-[#FF2D78] hover:text-white hover:scale-110 transition-all"
+                href="https://www.instagram.com/midulcitienda/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center text-gray-400 hover:bg-[#FF2D78] hover:text-white hover:scale-110 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF2D78] focus-visible:ring-offset-2"
+                aria-label="Síguenos en Instagram"
               >
                 <Instagram className="w-4 h-4" />
               </a>
               <a
-                href="#"
-                className="w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center text-gray-400 hover:bg-[#7C3AED] hover:text-white hover:scale-110 transition-all"
+                href="https://web.facebook.com/dulcitienda/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center text-gray-400 hover:bg-[#7C3AED] hover:text-white hover:scale-110 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7C3AED] focus-visible:ring-offset-2"
+                aria-label="Síguenos en Facebook"
               >
                 <Facebook className="w-4 h-4" />
               </a>

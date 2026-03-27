@@ -2,9 +2,10 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { memo } from "react";
+import { memo, useCallback } from "react";
 import { StickerBadge } from "@/components/StickerBadge";
 import { QuantitySelector } from "@/components/QuantitySelector";
+import { cn } from "@/lib/utils";
 
 interface Product {
   _id: string;
@@ -22,12 +23,14 @@ interface CandyCardProps {
   product: Product;
   priority?: boolean;
   showBadge?: boolean;
+  className?: string;
 }
 
 export const CandyCard = memo(function CandyCard({
   product,
   priority = false,
   showBadge = true,
+  className,
 }: CandyCardProps) {
   const isLowStock =
     product.inventory != null && product.inventory.quantityAvailable < 20;
@@ -36,7 +39,7 @@ export const CandyCard = memo(function CandyCard({
     Date.now() - product._creationTime < 7 * 24 * 60 * 60 * 1000;
   const hasImage = product.images && product.images.length > 0;
 
-  const handleAdd = (quantity: number) => {
+  const handleAdd = useCallback((quantity: number) => {
     window.dispatchEvent(
       new CustomEvent("add-to-cart", {
         detail: {
@@ -49,7 +52,7 @@ export const CandyCard = memo(function CandyCard({
       })
     );
     window.dispatchEvent(new CustomEvent("cart-updated"));
-  };
+  }, [product]);
 
   // Badge priority: low stock > featured > new
   const badge = showBadge
@@ -62,9 +65,25 @@ export const CandyCard = memo(function CandyCard({
           : null
     : null;
 
+  const stockText = product.inventory
+    ? `${product.inventory.quantityAvailable} disponibles`
+    : null;
+
   return (
-    <article className="group bg-white rounded-2xl shadow-md overflow-hidden hover:-translate-y-2 hover:shadow-xl transition-all duration-300">
-      <Link href={`/producto/${product.sku}`} className="block">
+    <article
+      className={cn(
+        "group bg-white rounded-2xl shadow-md overflow-hidden",
+        "hover:-translate-y-1 hover:shadow-xl",
+        "transition-all duration-300 ease-out",
+        "focus-within:ring-2 focus-within:ring-[#7C3AED] focus-within:ring-offset-2",
+        className
+      )}
+    >
+      <Link
+        href={`/producto/${product.sku}`}
+        className="block outline-none"
+        aria-label={`Ver detalles de ${product.name}`}
+      >
         <div className="aspect-square relative bg-gray-50 overflow-hidden">
           {hasImage ? (
             <Image
@@ -78,7 +97,7 @@ export const CandyCard = memo(function CandyCard({
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-4xl bg-gradient-to-br from-pink-100 to-yellow-100">
-              🍬
+              <span aria-hidden="true">🍬</span>
             </div>
           )}
 
@@ -91,25 +110,35 @@ export const CandyCard = memo(function CandyCard({
               />
             </div>
           )}
+          
+          {/* Hover overlay with quick action */}
+          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300" />
         </div>
 
         <div className="p-3 sm:p-4">
-          <h3 className="font-display font-semibold text-[#1E1012] text-sm sm:text-base line-clamp-2 mb-1">
+          <h3 className="font-display font-semibold text-[#1E1012] text-sm sm:text-base line-clamp-2 mb-1 group-hover:text-[#7C3AED] transition-colors">
             {product.name}
           </h3>
-          <p className="text-lg sm:text-xl font-bold text-[#1E1012]">
-            ${product.basePrice.toLocaleString()}
-          </p>
-          <p className="text-xs text-[#1E1012]/50">
-            Min. {product.minimumOrderQuantity} uds
-          </p>
-          {product.inventory && (
+          
+          <div className="flex items-baseline gap-2">
+            <p className="text-lg sm:text-xl font-bold text-[#1E1012]">
+              ${product.basePrice.toLocaleString()}
+            </p>
+            <span className="text-xs text-[#1E1012]/50">
+              Min. {product.minimumOrderQuantity} uds
+            </span>
+          </div>
+          
+          {stockText && (
             <p
-              className={`text-xs ${
-                isLowStock ? "text-red-500" : "text-green-600"
-              }`}
+              className={cn(
+                "text-xs mt-1",
+                isLowStock ? "text-amber-600 font-medium" : "text-green-600"
+              )}
+              aria-live="polite"
             >
-              {product.inventory.quantityAvailable} disponibles
+              {isLowStock && <span aria-hidden="true">🔥 </span>}
+              {stockText}
             </p>
           )}
         </div>
@@ -163,11 +192,16 @@ export function CandyCardGrid({
 
   if (products.length === 0) {
     return (
-      <div className="text-center py-12">
-        <div className="text-6xl mb-4">📦</div>
-        <h3 className="text-lg font-semibold text-gray-700">
-          No encontramos nada... pero tenemos 550+ cosas más
+      <div className="text-center py-16">
+        <div className="w-20 h-20 bg-[#FFFBF0] rounded-full flex items-center justify-center mx-auto mb-4">
+          <span className="text-4xl">📦</span>
+        </div>
+        <h3 className="text-lg font-semibold text-[#1E1012] mb-2">
+          No encontramos productos
         </h3>
+        <p className="text-[#1E1012]/60 max-w-md mx-auto">
+          Intenta con otros términos de búsqueda o explora nuestras categorías
+        </p>
       </div>
     );
   }
