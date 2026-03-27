@@ -1,12 +1,16 @@
 "use client";
 
 import { useState, useRef, useCallback, useEffect } from "react";
+import { Minus, Plus, Check } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface QuantitySelectorProps {
   initialQuantity: number;
   minQuantity: number;
   onAdd: (quantity: number) => void;
   className?: string;
+  compact?: boolean;
+  step?: number;
 }
 
 export function QuantitySelector({
@@ -14,6 +18,8 @@ export function QuantitySelector({
   minQuantity,
   onAdd,
   className = "",
+  compact = false,
+  step = 1,
 }: QuantitySelectorProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [quantity, setQuantity] = useState(initialQuantity);
@@ -58,24 +64,30 @@ export function QuantitySelector({
 
   const handleDecrement = () => {
     setQuantity((prev) => {
-      const next = Math.max(minQuantity, prev - 1);
+      const next = Math.max(minQuantity, prev - step);
       return next;
     });
     resetAutoCollapse();
   };
 
   const handleIncrement = () => {
-    setQuantity((prev) => prev + 1);
+    setQuantity((prev) => prev + step);
     resetAutoCollapse();
   };
 
   if (showCheck) {
     return (
       <div
-        className={`flex items-center justify-center py-2 ${className}`}
+        className={cn(
+          "flex items-center justify-center py-2 text-green-600",
+          compact && "py-1",
+          className
+        )}
         onClick={(e) => e.preventDefault()}
+        aria-live="polite"
       >
-        <span className="text-green-500 font-bold text-lg">✓</span>
+        <Check className="w-5 h-5" aria-hidden="true" />
+        <span className="sr-only">Agregado al carrito</span>
       </div>
     );
   }
@@ -86,7 +98,11 @@ export function QuantitySelector({
         <button
           type="button"
           onClick={handleExpand}
-          className="bg-[#FF2D78] text-white rounded-full w-full py-2 text-sm font-medium hover:opacity-90 transition-opacity"
+          className={cn(
+            "bg-[#FF2D78] text-white rounded-full w-full font-medium hover:opacity-90 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF2D78] focus-visible:ring-offset-2",
+            compact ? "py-1.5 text-xs" : "py-2 text-sm"
+          )}
+          aria-label={`Agregar ${initialQuantity} unidades al carrito`}
         >
           Agregar
         </button>
@@ -96,25 +112,49 @@ export function QuantitySelector({
 
   return (
     <div
-      className={`flex items-center justify-between gap-2 ${className}`}
+      className={cn(
+        "flex items-center justify-between gap-2",
+        compact && "gap-1",
+        className
+      )}
       onClick={(e) => e.preventDefault()}
+      role="group"
+      aria-label="Selector de cantidad"
     >
       <button
         type="button"
         onClick={handleDecrement}
-        className="w-8 h-8 rounded-full bg-gray-200 text-[#1E1012] font-bold flex items-center justify-center hover:bg-gray-300 transition-colors"
+        disabled={quantity <= minQuantity}
+        className={cn(
+          "rounded-full bg-gray-200 text-[#1E1012] flex items-center justify-center hover:bg-gray-300 transition-colors disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7C3AED] focus-visible:ring-offset-2",
+          compact ? "w-7 h-7" : "w-8 h-8"
+        )}
+        aria-label="Disminuir cantidad"
       >
-        -
+        <Minus className={cn("w-4 h-4", compact && "w-3 h-3")} />
       </button>
-      <span className="text-sm font-semibold text-[#1E1012] min-w-[2rem] text-center">
+      
+      <span 
+        className={cn(
+          "font-semibold text-[#1E1012] min-w-[2rem] text-center",
+          compact ? "text-sm" : "text-sm"
+        )}
+        aria-live="polite"
+        aria-atomic="true"
+      >
         {quantity}
       </span>
+      
       <button
         type="button"
         onClick={handleIncrement}
-        className="w-8 h-8 rounded-full bg-[#FF2D78] text-white font-bold flex items-center justify-center hover:opacity-90 transition-opacity"
+        className={cn(
+          "rounded-full bg-[#FF2D78] text-white flex items-center justify-center hover:opacity-90 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF2D78] focus-visible:ring-offset-2",
+          compact ? "w-7 h-7" : "w-8 h-8"
+        )}
+        aria-label="Aumentar cantidad"
       >
-        +
+        <Plus className={cn("w-4 h-4", compact && "w-3 h-3")} />
       </button>
     </div>
   );
